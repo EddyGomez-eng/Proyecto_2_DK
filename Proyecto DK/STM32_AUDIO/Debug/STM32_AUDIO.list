@@ -1,0 +1,3020 @@
+
+STM32_AUDIO.elf:     file format elf32-littlearm
+
+Sections:
+Idx Name          Size      VMA       LMA       File off  Algn
+  0 .isr_vector   000001c4  08000000  08000000  00001000  2**0
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  1 .text         00001014  080001c4  080001c4  000011c4  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  2 .rodata       00000214  080011d8  080011d8  000021d8  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  3 .ARM.extab    00000000  080013ec  080013ec  0000300c  2**0
+                  CONTENTS, READONLY
+  4 .ARM          00000000  080013ec  080013ec  0000300c  2**0
+                  CONTENTS, READONLY
+  5 .preinit_array 00000000  080013ec  080013ec  0000300c  2**0
+                  CONTENTS, ALLOC, LOAD, DATA
+  6 .init_array   00000004  080013ec  080013ec  000023ec  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  7 .fini_array   00000004  080013f0  080013f0  000023f0  2**2
+                  CONTENTS, ALLOC, LOAD, READONLY, DATA
+  8 .data         0000000c  20000000  080013f4  00003000  2**2
+                  CONTENTS, ALLOC, LOAD, DATA
+  9 .bss          0000003c  2000000c  08001400  0000300c  2**2
+                  ALLOC
+ 10 ._user_heap_stack 00000600  20000048  08001400  00003048  2**0
+                  ALLOC
+ 11 .ARM.attributes 00000030  00000000  00000000  0000300c  2**0
+                  CONTENTS, READONLY
+ 12 .debug_info   000045f1  00000000  00000000  0000303c  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 13 .debug_abbrev 00000fca  00000000  00000000  0000762d  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 14 .debug_aranges 00000480  00000000  00000000  000085f8  2**3
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 15 .debug_rnglists 00000344  00000000  00000000  00008a78  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 16 .debug_macro  0002014c  00000000  00000000  00008dbc  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 17 .debug_line   000054b4  00000000  00000000  00028f08  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 18 .debug_str    000c5ab2  00000000  00000000  0002e3bc  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 19 .comment      00000043  00000000  00000000  000f3e6e  2**0
+                  CONTENTS, READONLY
+ 20 .debug_frame  00000f18  00000000  00000000  000f3eb4  2**2
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+ 21 .debug_line_str 00000064  00000000  00000000  000f4dcc  2**0
+                  CONTENTS, READONLY, DEBUGGING, OCTETS
+
+Disassembly of section .text:
+
+080001c4 <__do_global_dtors_aux>:
+ 80001c4:	b510      	push	{r4, lr}
+ 80001c6:	4c05      	ldr	r4, [pc, #20]	@ (80001dc <__do_global_dtors_aux+0x18>)
+ 80001c8:	7823      	ldrb	r3, [r4, #0]
+ 80001ca:	b933      	cbnz	r3, 80001da <__do_global_dtors_aux+0x16>
+ 80001cc:	4b04      	ldr	r3, [pc, #16]	@ (80001e0 <__do_global_dtors_aux+0x1c>)
+ 80001ce:	b113      	cbz	r3, 80001d6 <__do_global_dtors_aux+0x12>
+ 80001d0:	4804      	ldr	r0, [pc, #16]	@ (80001e4 <__do_global_dtors_aux+0x20>)
+ 80001d2:	f3af 8000 	nop.w
+ 80001d6:	2301      	movs	r3, #1
+ 80001d8:	7023      	strb	r3, [r4, #0]
+ 80001da:	bd10      	pop	{r4, pc}
+ 80001dc:	2000000c 	.word	0x2000000c
+ 80001e0:	00000000 	.word	0x00000000
+ 80001e4:	080011c0 	.word	0x080011c0
+
+080001e8 <frame_dummy>:
+ 80001e8:	b508      	push	{r3, lr}
+ 80001ea:	4b03      	ldr	r3, [pc, #12]	@ (80001f8 <frame_dummy+0x10>)
+ 80001ec:	b11b      	cbz	r3, 80001f6 <frame_dummy+0xe>
+ 80001ee:	4903      	ldr	r1, [pc, #12]	@ (80001fc <frame_dummy+0x14>)
+ 80001f0:	4803      	ldr	r0, [pc, #12]	@ (8000200 <frame_dummy+0x18>)
+ 80001f2:	f3af 8000 	nop.w
+ 80001f6:	bd08      	pop	{r3, pc}
+ 80001f8:	00000000 	.word	0x00000000
+ 80001fc:	20000010 	.word	0x20000010
+ 8000200:	080011c0 	.word	0x080011c0
+
+08000204 <Sonido_RelojTimer>:
+ * Si APB1 utiliza prescaler, los timers reciben el doble de
+ * la frecuencia del bus en esta familia STM32.
+ * ============================================================ */
+
+static uint32_t Sonido_RelojTimer(void)
+{
+ 8000204:	b580      	push	{r7, lr}
+ 8000206:	b082      	sub	sp, #8
+ 8000208:	af00      	add	r7, sp, #0
+    uint32_t pclk1 = HAL_RCC_GetPCLK1Freq();                            // Obtiene la frecuencia actual del bus APB1.
+ 800020a:	f000 ffa1 	bl	8001150 <HAL_RCC_GetPCLK1Freq>
+ 800020e:	6078      	str	r0, [r7, #4]
+
+    if ((RCC->CFGR & RCC_CFGR_PPRE1) >= RCC_CFGR_PPRE1_2)              // Comprueba si APB1 está usando un divisor distinto de 1.
+ 8000210:	4b07      	ldr	r3, [pc, #28]	@ (8000230 <Sonido_RelojTimer+0x2c>)
+ 8000212:	689b      	ldr	r3, [r3, #8]
+ 8000214:	f403 53e0 	and.w	r3, r3, #7168	@ 0x1c00
+ 8000218:	f5b3 5f80 	cmp.w	r3, #4096	@ 0x1000
+ 800021c:	d302      	bcc.n	8000224 <Sonido_RelojTimer+0x20>
+    {
+        return pclk1 * 2U;                                              // Los timers trabajan al doble de PCLK1 cuando APB1 está dividido.
+ 800021e:	687b      	ldr	r3, [r7, #4]
+ 8000220:	005b      	lsls	r3, r3, #1
+ 8000222:	e000      	b.n	8000226 <Sonido_RelojTimer+0x22>
+    }
+
+    return pclk1;                                                       // Sin división, el timer utiliza directamente PCLK1.
+ 8000224:	687b      	ldr	r3, [r7, #4]
+}
+ 8000226:	4618      	mov	r0, r3
+ 8000228:	3708      	adds	r7, #8
+ 800022a:	46bd      	mov	sp, r7
+ 800022c:	bd80      	pop	{r7, pc}
+ 800022e:	bf00      	nop
+ 8000230:	40023800 	.word	0x40023800
+
+08000234 <Sonido_Tono>:
+ *
+ * freq = 0 produce silencio.
+ * ============================================================ */
+
+static void Sonido_Tono(uint16_t freq, uint32_t duty)
+{
+ 8000234:	b480      	push	{r7}
+ 8000236:	b085      	sub	sp, #20
+ 8000238:	af00      	add	r7, sp, #0
+ 800023a:	4603      	mov	r3, r0
+ 800023c:	6039      	str	r1, [r7, #0]
+ 800023e:	80fb      	strh	r3, [r7, #6]
+    if (freq == 0U)                                                     // Comprueba si la entrada representa una pausa.
+ 8000240:	88fb      	ldrh	r3, [r7, #6]
+ 8000242:	2b00      	cmp	r3, #0
+ 8000244:	d103      	bne.n	800024e <Sonido_Tono+0x1a>
+    {
+        SONIDO_TIM->CCR3 = 0U;                                         // Coloca el duty en 0 para silenciar PB8.
+ 8000246:	4b0e      	ldr	r3, [pc, #56]	@ (8000280 <Sonido_Tono+0x4c>)
+ 8000248:	2200      	movs	r2, #0
+ 800024a:	63da      	str	r2, [r3, #60]	@ 0x3c
+        return;                                                         // No necesita calcular un periodo.
+ 800024c:	e013      	b.n	8000276 <Sonido_Tono+0x42>
+    }
+
+    uint32_t arr = (SONIDO_TICK_HZ / freq) - 1U;                       // Calcula el periodo necesario para obtener la frecuencia solicitada.
+ 800024e:	88fb      	ldrh	r3, [r7, #6]
+ 8000250:	4a0c      	ldr	r2, [pc, #48]	@ (8000284 <Sonido_Tono+0x50>)
+ 8000252:	fbb2 f3f3 	udiv	r3, r2, r3
+ 8000256:	3b01      	subs	r3, #1
+ 8000258:	60fb      	str	r3, [r7, #12]
+
+    SONIDO_TIM->ARR = arr;                                              // Actualiza el periodo del PWM.
+ 800025a:	4a09      	ldr	r2, [pc, #36]	@ (8000280 <Sonido_Tono+0x4c>)
+ 800025c:	68fb      	ldr	r3, [r7, #12]
+ 800025e:	62d3      	str	r3, [r2, #44]	@ 0x2c
+    SONIDO_TIM->CCR3 = ((arr + 1U) * duty) / 100U;                     // Calcula el duty del canal 3 como porcentaje del periodo.
+ 8000260:	68fb      	ldr	r3, [r7, #12]
+ 8000262:	3301      	adds	r3, #1
+ 8000264:	683a      	ldr	r2, [r7, #0]
+ 8000266:	fb02 f303 	mul.w	r3, r2, r3
+ 800026a:	4a05      	ldr	r2, [pc, #20]	@ (8000280 <Sonido_Tono+0x4c>)
+ 800026c:	4906      	ldr	r1, [pc, #24]	@ (8000288 <Sonido_Tono+0x54>)
+ 800026e:	fba1 1303 	umull	r1, r3, r1, r3
+ 8000272:	095b      	lsrs	r3, r3, #5
+ 8000274:	63d3      	str	r3, [r2, #60]	@ 0x3c
+}
+ 8000276:	3714      	adds	r7, #20
+ 8000278:	46bd      	mov	sp, r7
+ 800027a:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 800027e:	4770      	bx	lr
+ 8000280:	40000800 	.word	0x40000800
+ 8000284:	000f4240 	.word	0x000f4240
+ 8000288:	51eb851f 	.word	0x51eb851f
+
+0800028c <Sonido_Init>:
+ * El timer queda encendido desde el inicio; los tonos cambian
+ * modificando ARR y CCR3.
+ * ============================================================ */
+
+void Sonido_Init(void)
+{
+ 800028c:	b580      	push	{r7, lr}
+ 800028e:	b082      	sub	sp, #8
+ 8000290:	af00      	add	r7, sp, #0
+    /* --------------------------------------------------------
+     * RELOJES DE GPIOB Y TIM4
+     * -------------------------------------------------------- */
+
+    __HAL_RCC_GPIOB_CLK_ENABLE();                                       // Habilita el reloj del puerto donde está PB8.
+ 8000292:	2300      	movs	r3, #0
+ 8000294:	607b      	str	r3, [r7, #4]
+ 8000296:	4b34      	ldr	r3, [pc, #208]	@ (8000368 <Sonido_Init+0xdc>)
+ 8000298:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 800029a:	4a33      	ldr	r2, [pc, #204]	@ (8000368 <Sonido_Init+0xdc>)
+ 800029c:	f043 0302 	orr.w	r3, r3, #2
+ 80002a0:	6313      	str	r3, [r2, #48]	@ 0x30
+ 80002a2:	4b31      	ldr	r3, [pc, #196]	@ (8000368 <Sonido_Init+0xdc>)
+ 80002a4:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 80002a6:	f003 0302 	and.w	r3, r3, #2
+ 80002aa:	607b      	str	r3, [r7, #4]
+ 80002ac:	687b      	ldr	r3, [r7, #4]
+    RCC->APB1ENR |= RCC_APB1ENR_TIM4EN;                                // Habilita directamente el reloj de TIM4.
+ 80002ae:	4b2e      	ldr	r3, [pc, #184]	@ (8000368 <Sonido_Init+0xdc>)
+ 80002b0:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 80002b2:	4a2d      	ldr	r2, [pc, #180]	@ (8000368 <Sonido_Init+0xdc>)
+ 80002b4:	f043 0304 	orr.w	r3, r3, #4
+ 80002b8:	6413      	str	r3, [r2, #64]	@ 0x40
+    (void)RCC->APB1ENR;                                                 // Fuerza la lectura del registro para asegurar que el cambio se aplique.
+ 80002ba:	4b2b      	ldr	r3, [pc, #172]	@ (8000368 <Sonido_Init+0xdc>)
+ 80002bc:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+     * PB8 utiliza la función alternativa AF2 correspondiente
+     * al canal 3 de TIM4.
+     * -------------------------------------------------------- */
+
+    GPIOB->MODER =
+        (GPIOB->MODER & ~(3UL << (2U * 8U))) |
+ 80002be:	4b2b      	ldr	r3, [pc, #172]	@ (800036c <Sonido_Init+0xe0>)
+ 80002c0:	681b      	ldr	r3, [r3, #0]
+ 80002c2:	f423 3340 	bic.w	r3, r3, #196608	@ 0x30000
+    GPIOB->MODER =
+ 80002c6:	4a29      	ldr	r2, [pc, #164]	@ (800036c <Sonido_Init+0xe0>)
+        (GPIOB->MODER & ~(3UL << (2U * 8U))) |
+ 80002c8:	f443 3300 	orr.w	r3, r3, #131072	@ 0x20000
+    GPIOB->MODER =
+ 80002cc:	6013      	str	r3, [r2, #0]
+        (2UL << (2U * 8U));                                             // Configura PB8 como función alternativa.
+
+    GPIOB->OTYPER &= ~(1UL << 8U);                                      // Configura PB8 como salida push-pull.
+ 80002ce:	4b27      	ldr	r3, [pc, #156]	@ (800036c <Sonido_Init+0xe0>)
+ 80002d0:	685b      	ldr	r3, [r3, #4]
+ 80002d2:	4a26      	ldr	r2, [pc, #152]	@ (800036c <Sonido_Init+0xe0>)
+ 80002d4:	f423 7380 	bic.w	r3, r3, #256	@ 0x100
+ 80002d8:	6053      	str	r3, [r2, #4]
+    GPIOB->OSPEEDR |= (3UL << (2U * 8U));                               // Selecciona velocidad alta para la señal PWM.
+ 80002da:	4b24      	ldr	r3, [pc, #144]	@ (800036c <Sonido_Init+0xe0>)
+ 80002dc:	689b      	ldr	r3, [r3, #8]
+ 80002de:	4a23      	ldr	r2, [pc, #140]	@ (800036c <Sonido_Init+0xe0>)
+ 80002e0:	f443 3340 	orr.w	r3, r3, #196608	@ 0x30000
+ 80002e4:	6093      	str	r3, [r2, #8]
+    GPIOB->PUPDR &= ~(3UL << (2U * 8U));                                // Desactiva pull-up y pull-down internos.
+ 80002e6:	4b21      	ldr	r3, [pc, #132]	@ (800036c <Sonido_Init+0xe0>)
+ 80002e8:	68db      	ldr	r3, [r3, #12]
+ 80002ea:	4a20      	ldr	r2, [pc, #128]	@ (800036c <Sonido_Init+0xe0>)
+ 80002ec:	f423 3340 	bic.w	r3, r3, #196608	@ 0x30000
+ 80002f0:	60d3      	str	r3, [r2, #12]
+    GPIOB->AFR[1] =
+        (GPIOB->AFR[1] & ~(0xFUL << 0U)) |
+ 80002f2:	4b1e      	ldr	r3, [pc, #120]	@ (800036c <Sonido_Init+0xe0>)
+ 80002f4:	6a5b      	ldr	r3, [r3, #36]	@ 0x24
+ 80002f6:	f023 030f 	bic.w	r3, r3, #15
+    GPIOB->AFR[1] =
+ 80002fa:	4a1c      	ldr	r2, [pc, #112]	@ (800036c <Sonido_Init+0xe0>)
+        (GPIOB->AFR[1] & ~(0xFUL << 0U)) |
+ 80002fc:	f043 0302 	orr.w	r3, r3, #2
+    GPIOB->AFR[1] =
+ 8000300:	6253      	str	r3, [r2, #36]	@ 0x24
+     * ARR empieza en 999 únicamente como periodo inicial.
+     * CCR3 = 0 mantiene silencio durante la inicialización.
+     * -------------------------------------------------------- */
+
+    SONIDO_TIM->PSC =
+        (Sonido_RelojTimer() / SONIDO_TICK_HZ) - 1U;                   // Ajusta el prescaler para obtener una cuenta cada 1 us.
+ 8000302:	f7ff ff7f 	bl	8000204 <Sonido_RelojTimer>
+ 8000306:	4603      	mov	r3, r0
+ 8000308:	4a19      	ldr	r2, [pc, #100]	@ (8000370 <Sonido_Init+0xe4>)
+ 800030a:	fba2 2303 	umull	r2, r3, r2, r3
+ 800030e:	0c9b      	lsrs	r3, r3, #18
+    SONIDO_TIM->PSC =
+ 8000310:	4a18      	ldr	r2, [pc, #96]	@ (8000374 <Sonido_Init+0xe8>)
+        (Sonido_RelojTimer() / SONIDO_TICK_HZ) - 1U;                   // Ajusta el prescaler para obtener una cuenta cada 1 us.
+ 8000312:	3b01      	subs	r3, #1
+    SONIDO_TIM->PSC =
+ 8000314:	6293      	str	r3, [r2, #40]	@ 0x28
+
+    SONIDO_TIM->ARR = 999U;                                             // Establece un periodo inicial antes de seleccionar una nota.
+ 8000316:	4b17      	ldr	r3, [pc, #92]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000318:	f240 32e7 	movw	r2, #999	@ 0x3e7
+ 800031c:	62da      	str	r2, [r3, #44]	@ 0x2c
+    SONIDO_TIM->CCR3 = 0U;                                              // Inicia la salida PWM en silencio.
+ 800031e:	4b15      	ldr	r3, [pc, #84]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000320:	2200      	movs	r2, #0
+ 8000322:	63da      	str	r2, [r3, #60]	@ 0x3c
+     * OC3M = 110 selecciona PWM mode 1.
+     * OC3PE activa el preload de CCR3.
+     * -------------------------------------------------------- */
+
+    SONIDO_TIM->CCMR2 =
+        (SONIDO_TIM->CCMR2 & ~(TIM_CCMR2_OC3M | TIM_CCMR2_CC3S))
+ 8000324:	4b13      	ldr	r3, [pc, #76]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000326:	69db      	ldr	r3, [r3, #28]
+        | (6UL << TIM_CCMR2_OC3M_Pos)
+        | TIM_CCMR2_OC3PE;                                              // Configura el canal 3 como salida PWM modo 1 con preload.
+ 8000328:	f023 037b 	bic.w	r3, r3, #123	@ 0x7b
+    SONIDO_TIM->CCMR2 =
+ 800032c:	4a11      	ldr	r2, [pc, #68]	@ (8000374 <Sonido_Init+0xe8>)
+        | TIM_CCMR2_OC3PE;                                              // Configura el canal 3 como salida PWM modo 1 con preload.
+ 800032e:	f043 0368 	orr.w	r3, r3, #104	@ 0x68
+    SONIDO_TIM->CCMR2 =
+ 8000332:	61d3      	str	r3, [r2, #28]
+
+    SONIDO_TIM->CCER |= TIM_CCER_CC3E;                                  // Habilita físicamente la salida del canal 3.
+ 8000334:	4b0f      	ldr	r3, [pc, #60]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000336:	6a1b      	ldr	r3, [r3, #32]
+ 8000338:	4a0e      	ldr	r2, [pc, #56]	@ (8000374 <Sonido_Init+0xe8>)
+ 800033a:	f443 7380 	orr.w	r3, r3, #256	@ 0x100
+ 800033e:	6213      	str	r3, [r2, #32]
+    SONIDO_TIM->CR1 |= TIM_CR1_ARPE;                                    // Habilita preload del registro ARR.
+ 8000340:	4b0c      	ldr	r3, [pc, #48]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000342:	681b      	ldr	r3, [r3, #0]
+ 8000344:	4a0b      	ldr	r2, [pc, #44]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000346:	f043 0380 	orr.w	r3, r3, #128	@ 0x80
+ 800034a:	6013      	str	r3, [r2, #0]
+    SONIDO_TIM->EGR = TIM_EGR_UG;                                       // Fuerza una actualización para cargar PSC, ARR y CCR.
+ 800034c:	4b09      	ldr	r3, [pc, #36]	@ (8000374 <Sonido_Init+0xe8>)
+ 800034e:	2201      	movs	r2, #1
+ 8000350:	615a      	str	r2, [r3, #20]
+    SONIDO_TIM->CR1 |= TIM_CR1_CEN;                                     // Inicia el contador TIM4.
+ 8000352:	4b08      	ldr	r3, [pc, #32]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000354:	681b      	ldr	r3, [r3, #0]
+ 8000356:	4a07      	ldr	r2, [pc, #28]	@ (8000374 <Sonido_Init+0xe8>)
+ 8000358:	f043 0301 	orr.w	r3, r3, #1
+ 800035c:	6013      	str	r3, [r2, #0]
+}
+ 800035e:	bf00      	nop
+ 8000360:	3708      	adds	r7, #8
+ 8000362:	46bd      	mov	sp, r7
+ 8000364:	bd80      	pop	{r7, pc}
+ 8000366:	bf00      	nop
+ 8000368:	40023800 	.word	0x40023800
+ 800036c:	40020400 	.word	0x40020400
+ 8000370:	431bde83 	.word	0x431bde83
+ 8000374:	40000800 	.word	0x40000800
+
+08000378 <Sonido_NotaMusica>:
+ * menú, martillo o juego normal.
+ * Después genera la nota actual y calcula cuándo termina.
+ * ============================================================ */
+
+static void Sonido_NotaMusica(uint32_t ahora)
+{
+ 8000378:	b580      	push	{r7, lr}
+ 800037a:	b084      	sub	sp, #16
+ 800037c:	af00      	add	r7, sp, #0
+ 800037e:	6078      	str	r0, [r7, #4]
+    const Nota *notas =
+        modoMenu ? musicaMenu :
+ 8000380:	4b13      	ldr	r3, [pc, #76]	@ (80003d0 <Sonido_NotaMusica+0x58>)
+ 8000382:	781b      	ldrb	r3, [r3, #0]
+ 8000384:	2b00      	cmp	r3, #0
+ 8000386:	d107      	bne.n	8000398 <Sonido_NotaMusica+0x20>
+        (modoMartillo ? musicaMartillo : musicaJuego);                  // Selecciona el arreglo correspondiente al modo actual.
+ 8000388:	4b12      	ldr	r3, [pc, #72]	@ (80003d4 <Sonido_NotaMusica+0x5c>)
+ 800038a:	781b      	ldrb	r3, [r3, #0]
+ 800038c:	2b00      	cmp	r3, #0
+ 800038e:	d001      	beq.n	8000394 <Sonido_NotaMusica+0x1c>
+ 8000390:	4b11      	ldr	r3, [pc, #68]	@ (80003d8 <Sonido_NotaMusica+0x60>)
+ 8000392:	e002      	b.n	800039a <Sonido_NotaMusica+0x22>
+ 8000394:	4b11      	ldr	r3, [pc, #68]	@ (80003dc <Sonido_NotaMusica+0x64>)
+ 8000396:	e000      	b.n	800039a <Sonido_NotaMusica+0x22>
+        modoMenu ? musicaMenu :
+ 8000398:	4b11      	ldr	r3, [pc, #68]	@ (80003e0 <Sonido_NotaMusica+0x68>)
+    const Nota *notas =
+ 800039a:	60fb      	str	r3, [r7, #12]
+
+    Sonido_Tono(
+        notas[musicaIdx].freq,
+ 800039c:	4b11      	ldr	r3, [pc, #68]	@ (80003e4 <Sonido_NotaMusica+0x6c>)
+ 800039e:	781b      	ldrb	r3, [r3, #0]
+ 80003a0:	009b      	lsls	r3, r3, #2
+ 80003a2:	68fa      	ldr	r2, [r7, #12]
+ 80003a4:	4413      	add	r3, r2
+ 80003a6:	881b      	ldrh	r3, [r3, #0]
+    Sonido_Tono(
+ 80003a8:	2123      	movs	r1, #35	@ 0x23
+ 80003aa:	4618      	mov	r0, r3
+ 80003ac:	f7ff ff42 	bl	8000234 <Sonido_Tono>
+        SONIDO_DUTY_MUSICA
+    );                                                                  // Genera la frecuencia de la nota actual con duty de música.
+
+    musicaFin =
+        ahora + notas[musicaIdx].ms;                                    // Calcula el tick en que debe avanzar a la siguiente nota.
+ 80003b0:	4b0c      	ldr	r3, [pc, #48]	@ (80003e4 <Sonido_NotaMusica+0x6c>)
+ 80003b2:	781b      	ldrb	r3, [r3, #0]
+ 80003b4:	009b      	lsls	r3, r3, #2
+ 80003b6:	68fa      	ldr	r2, [r7, #12]
+ 80003b8:	4413      	add	r3, r2
+ 80003ba:	885b      	ldrh	r3, [r3, #2]
+ 80003bc:	461a      	mov	r2, r3
+ 80003be:	687b      	ldr	r3, [r7, #4]
+ 80003c0:	4413      	add	r3, r2
+    musicaFin =
+ 80003c2:	4a09      	ldr	r2, [pc, #36]	@ (80003e8 <Sonido_NotaMusica+0x70>)
+ 80003c4:	6013      	str	r3, [r2, #0]
+}
+ 80003c6:	bf00      	nop
+ 80003c8:	3710      	adds	r7, #16
+ 80003ca:	46bd      	mov	sp, r7
+ 80003cc:	bd80      	pop	{r7, pc}
+ 80003ce:	bf00      	nop
+ 80003d0:	20000036 	.word	0x20000036
+ 80003d4:	20000035 	.word	0x20000035
+ 80003d8:	080013b4 	.word	0x080013b4
+ 80003dc:	08001340 	.word	0x08001340
+ 80003e0:	080012d0 	.word	0x080012d0
+ 80003e4:	20000037 	.word	0x20000037
+ 80003e8:	20000038 	.word	0x20000038
+
+080003ec <Sonido_Efecto>:
+ *
+ * Los efectos tienen prioridad sobre la música.
+ * ============================================================ */
+
+void Sonido_Efecto(EfectoSonido id)
+{
+ 80003ec:	b580      	push	{r7, lr}
+ 80003ee:	b084      	sub	sp, #16
+ 80003f0:	af00      	add	r7, sp, #0
+ 80003f2:	4603      	mov	r3, r0
+ 80003f4:	71fb      	strb	r3, [r7, #7]
+    if (id >= SFX_NUM)                                                  // Comprueba que el identificador exista en la tabla.
+ 80003f6:	79fb      	ldrb	r3, [r7, #7]
+ 80003f8:	2b09      	cmp	r3, #9
+ 80003fa:	d833      	bhi.n	8000464 <Sonido_Efecto+0x78>
+    {
+        return;                                                         // Ignora identificadores fuera del rango válido.
+    }
+
+    const DefEfecto *def =
+        &sfxTabla[id];                                                   // Obtiene notas, cantidad y prioridad del efecto solicitado.
+ 80003fc:	79fb      	ldrb	r3, [r7, #7]
+    const DefEfecto *def =
+ 80003fe:	00db      	lsls	r3, r3, #3
+ 8000400:	4a1b      	ldr	r2, [pc, #108]	@ (8000470 <Sonido_Efecto+0x84>)
+ 8000402:	4413      	add	r3, r2
+ 8000404:	60fb      	str	r3, [r7, #12]
+
+    if (
+        sfxActivo &&
+ 8000406:	4b1b      	ldr	r3, [pc, #108]	@ (8000474 <Sonido_Efecto+0x88>)
+ 8000408:	781b      	ldrb	r3, [r3, #0]
+    if (
+ 800040a:	2b00      	cmp	r3, #0
+ 800040c:	d005      	beq.n	800041a <Sonido_Efecto+0x2e>
+        def->prioridad < sfxPrioridadActual
+ 800040e:	68fb      	ldr	r3, [r7, #12]
+ 8000410:	795a      	ldrb	r2, [r3, #5]
+ 8000412:	4b19      	ldr	r3, [pc, #100]	@ (8000478 <Sonido_Efecto+0x8c>)
+ 8000414:	781b      	ldrb	r3, [r3, #0]
+        sfxActivo &&
+ 8000416:	429a      	cmp	r2, r3
+ 8000418:	d326      	bcc.n	8000468 <Sonido_Efecto+0x7c>
+    {
+        return;                                                         // Mantiene el efecto más importante sin interrumpirlo.
+    }
+
+    uint32_t ahora =
+        HAL_GetTick();                                                   // Obtiene el tiempo actual del sistema en milisegundos.
+ 800041a:	f000 fbed 	bl	8000bf8 <HAL_GetTick>
+ 800041e:	60b8      	str	r0, [r7, #8]
+
+    sfxSeq = def->notas;                                                // Selecciona el arreglo de notas del nuevo efecto.
+ 8000420:	68fb      	ldr	r3, [r7, #12]
+ 8000422:	681b      	ldr	r3, [r3, #0]
+ 8000424:	4a15      	ldr	r2, [pc, #84]	@ (800047c <Sonido_Efecto+0x90>)
+ 8000426:	6013      	str	r3, [r2, #0]
+    sfxLen = def->cantidad;                                             // Guarda cuántas notas deberá reproducir.
+ 8000428:	68fb      	ldr	r3, [r7, #12]
+ 800042a:	791a      	ldrb	r2, [r3, #4]
+ 800042c:	4b14      	ldr	r3, [pc, #80]	@ (8000480 <Sonido_Efecto+0x94>)
+ 800042e:	701a      	strb	r2, [r3, #0]
+    sfxIdx = 0;                                                         // Comienza desde la primera nota.
+ 8000430:	4b14      	ldr	r3, [pc, #80]	@ (8000484 <Sonido_Efecto+0x98>)
+ 8000432:	2200      	movs	r2, #0
+ 8000434:	701a      	strb	r2, [r3, #0]
+    sfxPrioridadActual = def->prioridad;                                // Guarda la prioridad del nuevo efecto.
+ 8000436:	68fb      	ldr	r3, [r7, #12]
+ 8000438:	795a      	ldrb	r2, [r3, #5]
+ 800043a:	4b0f      	ldr	r3, [pc, #60]	@ (8000478 <Sonido_Efecto+0x8c>)
+ 800043c:	701a      	strb	r2, [r3, #0]
+    sfxActivo = 1;                                                      // Marca que la música queda temporalmente reemplazada por un efecto.
+ 800043e:	4b0d      	ldr	r3, [pc, #52]	@ (8000474 <Sonido_Efecto+0x88>)
+ 8000440:	2201      	movs	r2, #1
+ 8000442:	701a      	strb	r2, [r3, #0]
+
+    Sonido_Tono(
+        sfxSeq[0].freq,
+ 8000444:	4b0d      	ldr	r3, [pc, #52]	@ (800047c <Sonido_Efecto+0x90>)
+ 8000446:	681b      	ldr	r3, [r3, #0]
+ 8000448:	881b      	ldrh	r3, [r3, #0]
+    Sonido_Tono(
+ 800044a:	2132      	movs	r1, #50	@ 0x32
+ 800044c:	4618      	mov	r0, r3
+ 800044e:	f7ff fef1 	bl	8000234 <Sonido_Tono>
+        SONIDO_DUTY_SFX
+    );                                                                  // Reproduce inmediatamente la primera nota del efecto.
+
+    sfxFin =
+        ahora + sfxSeq[0].ms;                                           // Calcula cuándo debe terminar la primera nota.
+ 8000452:	4b0a      	ldr	r3, [pc, #40]	@ (800047c <Sonido_Efecto+0x90>)
+ 8000454:	681b      	ldr	r3, [r3, #0]
+ 8000456:	885b      	ldrh	r3, [r3, #2]
+ 8000458:	461a      	mov	r2, r3
+ 800045a:	68bb      	ldr	r3, [r7, #8]
+ 800045c:	4413      	add	r3, r2
+    sfxFin =
+ 800045e:	4a0a      	ldr	r2, [pc, #40]	@ (8000488 <Sonido_Efecto+0x9c>)
+ 8000460:	6013      	str	r3, [r2, #0]
+ 8000462:	e002      	b.n	800046a <Sonido_Efecto+0x7e>
+        return;                                                         // Ignora identificadores fuera del rango válido.
+ 8000464:	bf00      	nop
+ 8000466:	e000      	b.n	800046a <Sonido_Efecto+0x7e>
+        return;                                                         // Mantiene el efecto más importante sin interrumpirlo.
+ 8000468:	bf00      	nop
+}
+ 800046a:	3710      	adds	r7, #16
+ 800046c:	46bd      	mov	sp, r7
+ 800046e:	bd80      	pop	{r7, pc}
+ 8000470:	08001280 	.word	0x08001280
+ 8000474:	2000002e 	.word	0x2000002e
+ 8000478:	2000002f 	.word	0x2000002f
+ 800047c:	20000028 	.word	0x20000028
+ 8000480:	2000002c 	.word	0x2000002c
+ 8000484:	2000002d 	.word	0x2000002d
+ 8000488:	20000030 	.word	0x20000030
+
+0800048c <Musica_Iniciar>:
+ * Si un efecto está sonando, la música queda preparada pero
+ * espera hasta que termine el efecto.
+ * ============================================================ */
+
+void Musica_Iniciar(void)
+{
+ 800048c:	b580      	push	{r7, lr}
+ 800048e:	af00      	add	r7, sp, #0
+    modoMenu = 0;                                                       // Desactiva la selección de música de menú.
+ 8000490:	4b0b      	ldr	r3, [pc, #44]	@ (80004c0 <Musica_Iniciar+0x34>)
+ 8000492:	2200      	movs	r2, #0
+ 8000494:	701a      	strb	r2, [r3, #0]
+    modoMartillo = 0;                                                   // Desactiva la selección de música de martillo.
+ 8000496:	4b0b      	ldr	r3, [pc, #44]	@ (80004c4 <Musica_Iniciar+0x38>)
+ 8000498:	2200      	movs	r2, #0
+ 800049a:	701a      	strb	r2, [r3, #0]
+    musicaActiva = 1;                                                   // Indica que la música debe mantenerse reproduciendo.
+ 800049c:	4b0a      	ldr	r3, [pc, #40]	@ (80004c8 <Musica_Iniciar+0x3c>)
+ 800049e:	2201      	movs	r2, #1
+ 80004a0:	701a      	strb	r2, [r3, #0]
+    musicaIdx = 0;                                                      // Reinicia la melodía desde su primera nota.
+ 80004a2:	4b0a      	ldr	r3, [pc, #40]	@ (80004cc <Musica_Iniciar+0x40>)
+ 80004a4:	2200      	movs	r2, #0
+ 80004a6:	701a      	strb	r2, [r3, #0]
+
+    if (!sfxActivo)                                                     // Comprueba que ningún efecto tenga prioridad en este momento.
+ 80004a8:	4b09      	ldr	r3, [pc, #36]	@ (80004d0 <Musica_Iniciar+0x44>)
+ 80004aa:	781b      	ldrb	r3, [r3, #0]
+ 80004ac:	2b00      	cmp	r3, #0
+ 80004ae:	d105      	bne.n	80004bc <Musica_Iniciar+0x30>
+    {
+        Sonido_NotaMusica(HAL_GetTick());                               // Inicia inmediatamente la primera nota de musicaJuego.
+ 80004b0:	f000 fba2 	bl	8000bf8 <HAL_GetTick>
+ 80004b4:	4603      	mov	r3, r0
+ 80004b6:	4618      	mov	r0, r3
+ 80004b8:	f7ff ff5e 	bl	8000378 <Sonido_NotaMusica>
+    }
+}
+ 80004bc:	bf00      	nop
+ 80004be:	bd80      	pop	{r7, pc}
+ 80004c0:	20000036 	.word	0x20000036
+ 80004c4:	20000035 	.word	0x20000035
+ 80004c8:	20000034 	.word	0x20000034
+ 80004cc:	20000037 	.word	0x20000037
+ 80004d0:	2000002e 	.word	0x2000002e
+
+080004d4 <Musica_IniciarMenu>:
+ * Selecciona musicaMenu y comienza desde la primera nota.
+ * El estado no se reinicia mientras ya se encuentre en menú.
+ * ============================================================ */
+
+static void Musica_IniciarMenu(void)
+{
+ 80004d4:	b580      	push	{r7, lr}
+ 80004d6:	af00      	add	r7, sp, #0
+    modoMenu = 1U;                                                      // Selecciona la melodía del menú.
+ 80004d8:	4b0b      	ldr	r3, [pc, #44]	@ (8000508 <Musica_IniciarMenu+0x34>)
+ 80004da:	2201      	movs	r2, #1
+ 80004dc:	701a      	strb	r2, [r3, #0]
+    modoMartillo = 0U;                                                  // Evita seleccionar simultáneamente música de martillo.
+ 80004de:	4b0b      	ldr	r3, [pc, #44]	@ (800050c <Musica_IniciarMenu+0x38>)
+ 80004e0:	2200      	movs	r2, #0
+ 80004e2:	701a      	strb	r2, [r3, #0]
+    musicaActiva = 1U;                                                  // Mantiene habilitada la reproducción de música.
+ 80004e4:	4b0a      	ldr	r3, [pc, #40]	@ (8000510 <Musica_IniciarMenu+0x3c>)
+ 80004e6:	2201      	movs	r2, #1
+ 80004e8:	701a      	strb	r2, [r3, #0]
+    musicaIdx = 0U;                                                     // Comienza desde la primera nota.
+ 80004ea:	4b0a      	ldr	r3, [pc, #40]	@ (8000514 <Musica_IniciarMenu+0x40>)
+ 80004ec:	2200      	movs	r2, #0
+ 80004ee:	701a      	strb	r2, [r3, #0]
+
+    if (!sfxActivo)
+ 80004f0:	4b09      	ldr	r3, [pc, #36]	@ (8000518 <Musica_IniciarMenu+0x44>)
+ 80004f2:	781b      	ldrb	r3, [r3, #0]
+ 80004f4:	2b00      	cmp	r3, #0
+ 80004f6:	d105      	bne.n	8000504 <Musica_IniciarMenu+0x30>
+        Sonido_NotaMusica(HAL_GetTick());                               // Inicia el menú si ningún efecto está ocupando la salida.
+ 80004f8:	f000 fb7e 	bl	8000bf8 <HAL_GetTick>
+ 80004fc:	4603      	mov	r3, r0
+ 80004fe:	4618      	mov	r0, r3
+ 8000500:	f7ff ff3a 	bl	8000378 <Sonido_NotaMusica>
+}
+ 8000504:	bf00      	nop
+ 8000506:	bd80      	pop	{r7, pc}
+ 8000508:	20000036 	.word	0x20000036
+ 800050c:	20000035 	.word	0x20000035
+ 8000510:	20000034 	.word	0x20000034
+ 8000514:	20000037 	.word	0x20000037
+ 8000518:	2000002e 	.word	0x2000002e
+
+0800051c <Musica_Detener>:
+ * Desactiva la música de fondo.
+ * Si existe un efecto, este continúa hasta terminar.
+ * ============================================================ */
+
+void Musica_Detener(void)
+{
+ 800051c:	b580      	push	{r7, lr}
+ 800051e:	af00      	add	r7, sp, #0
+    musicaActiva = 0;                                                   // Impide que se reproduzcan nuevas notas de música.
+ 8000520:	4b06      	ldr	r3, [pc, #24]	@ (800053c <Musica_Detener+0x20>)
+ 8000522:	2200      	movs	r2, #0
+ 8000524:	701a      	strb	r2, [r3, #0]
+
+    if (!sfxActivo)                                                     // Comprueba si la salida PWM no está siendo utilizada por un efecto.
+ 8000526:	4b06      	ldr	r3, [pc, #24]	@ (8000540 <Musica_Detener+0x24>)
+ 8000528:	781b      	ldrb	r3, [r3, #0]
+ 800052a:	2b00      	cmp	r3, #0
+ 800052c:	d103      	bne.n	8000536 <Musica_Detener+0x1a>
+    {
+        Sonido_Tono(0U, 0U);                                            // Silencia inmediatamente PB8.
+ 800052e:	2100      	movs	r1, #0
+ 8000530:	2000      	movs	r0, #0
+ 8000532:	f7ff fe7f 	bl	8000234 <Sonido_Tono>
+    }
+}
+ 8000536:	bf00      	nop
+ 8000538:	bd80      	pop	{r7, pc}
+ 800053a:	bf00      	nop
+ 800053c:	20000034 	.word	0x20000034
+ 8000540:	2000002e 	.word	0x2000002e
+
+08000544 <Sonido_Actualizar>:
+ * 2. Al terminar, regresa a la música activa.
+ * 3. Si no hay efecto, avanza la melodía de fondo.
+ * ============================================================ */
+
+void Sonido_Actualizar(uint32_t ahora)
+{
+ 8000544:	b580      	push	{r7, lr}
+ 8000546:	b084      	sub	sp, #16
+ 8000548:	af00      	add	r7, sp, #0
+ 800054a:	6078      	str	r0, [r7, #4]
+    /* --------------------------------------------------------
+     * EFECTO ACTIVO
+     * -------------------------------------------------------- */
+
+    if (sfxActivo)                                                      // Da prioridad completa al efecto sobre la música.
+ 800054c:	4b37      	ldr	r3, [pc, #220]	@ (800062c <Sonido_Actualizar+0xe8>)
+ 800054e:	781b      	ldrb	r3, [r3, #0]
+ 8000550:	2b00      	cmp	r3, #0
+ 8000552:	d03c      	beq.n	80005ce <Sonido_Actualizar+0x8a>
+    {
+        if ((int32_t)(ahora - sfxFin) < 0)                             // Comprueba si la nota actual todavía no ha terminado.
+ 8000554:	4b36      	ldr	r3, [pc, #216]	@ (8000630 <Sonido_Actualizar+0xec>)
+ 8000556:	681b      	ldr	r3, [r3, #0]
+ 8000558:	687a      	ldr	r2, [r7, #4]
+ 800055a:	1ad3      	subs	r3, r2, r3
+ 800055c:	2b00      	cmp	r3, #0
+ 800055e:	db60      	blt.n	8000622 <Sonido_Actualizar+0xde>
+        {
+            return;                                                     // Mantiene la misma frecuencia hasta llegar a sfxFin.
+        }
+
+        sfxIdx++;                                                       // Avanza a la siguiente nota del efecto.
+ 8000560:	4b34      	ldr	r3, [pc, #208]	@ (8000634 <Sonido_Actualizar+0xf0>)
+ 8000562:	781b      	ldrb	r3, [r3, #0]
+ 8000564:	3301      	adds	r3, #1
+ 8000566:	b2da      	uxtb	r2, r3
+ 8000568:	4b32      	ldr	r3, [pc, #200]	@ (8000634 <Sonido_Actualizar+0xf0>)
+ 800056a:	701a      	strb	r2, [r3, #0]
+
+        if (sfxIdx < sfxLen)                                            // Comprueba si todavía quedan notas por reproducir.
+ 800056c:	4b31      	ldr	r3, [pc, #196]	@ (8000634 <Sonido_Actualizar+0xf0>)
+ 800056e:	781a      	ldrb	r2, [r3, #0]
+ 8000570:	4b31      	ldr	r3, [pc, #196]	@ (8000638 <Sonido_Actualizar+0xf4>)
+ 8000572:	781b      	ldrb	r3, [r3, #0]
+ 8000574:	429a      	cmp	r2, r3
+ 8000576:	d217      	bcs.n	80005a8 <Sonido_Actualizar+0x64>
+        {
+            Sonido_Tono(
+                sfxSeq[sfxIdx].freq,
+ 8000578:	4b30      	ldr	r3, [pc, #192]	@ (800063c <Sonido_Actualizar+0xf8>)
+ 800057a:	681a      	ldr	r2, [r3, #0]
+ 800057c:	4b2d      	ldr	r3, [pc, #180]	@ (8000634 <Sonido_Actualizar+0xf0>)
+ 800057e:	781b      	ldrb	r3, [r3, #0]
+ 8000580:	009b      	lsls	r3, r3, #2
+ 8000582:	4413      	add	r3, r2
+ 8000584:	881b      	ldrh	r3, [r3, #0]
+            Sonido_Tono(
+ 8000586:	2132      	movs	r1, #50	@ 0x32
+ 8000588:	4618      	mov	r0, r3
+ 800058a:	f7ff fe53 	bl	8000234 <Sonido_Tono>
+                SONIDO_DUTY_SFX
+            );                                                          // Cambia PB8 a la frecuencia de la nueva nota.
+
+            sfxFin =
+                ahora + sfxSeq[sfxIdx].ms;                              // Programa cuándo terminará esta nota.
+ 800058e:	4b2b      	ldr	r3, [pc, #172]	@ (800063c <Sonido_Actualizar+0xf8>)
+ 8000590:	681a      	ldr	r2, [r3, #0]
+ 8000592:	4b28      	ldr	r3, [pc, #160]	@ (8000634 <Sonido_Actualizar+0xf0>)
+ 8000594:	781b      	ldrb	r3, [r3, #0]
+ 8000596:	009b      	lsls	r3, r3, #2
+ 8000598:	4413      	add	r3, r2
+ 800059a:	885b      	ldrh	r3, [r3, #2]
+ 800059c:	461a      	mov	r2, r3
+ 800059e:	687b      	ldr	r3, [r7, #4]
+ 80005a0:	4413      	add	r3, r2
+            sfxFin =
+ 80005a2:	4a23      	ldr	r2, [pc, #140]	@ (8000630 <Sonido_Actualizar+0xec>)
+ 80005a4:	6013      	str	r3, [r2, #0]
+
+            return;                                                     // Mantiene el control en el efecto hasta que termine toda la secuencia.
+ 80005a6:	e03d      	b.n	8000624 <Sonido_Actualizar+0xe0>
+         *
+         * Libera el canal de efectos y devuelve la salida
+         * a la música que estaba activa antes.
+         * ---------------------------------------------------- */
+
+        sfxActivo = 0;                                                  // Indica que ya no existe un efecto reproduciéndose.
+ 80005a8:	4b20      	ldr	r3, [pc, #128]	@ (800062c <Sonido_Actualizar+0xe8>)
+ 80005aa:	2200      	movs	r2, #0
+ 80005ac:	701a      	strb	r2, [r3, #0]
+        sfxPrioridadActual = 0;                                         // Libera la prioridad para futuros efectos.
+ 80005ae:	4b24      	ldr	r3, [pc, #144]	@ (8000640 <Sonido_Actualizar+0xfc>)
+ 80005b0:	2200      	movs	r2, #0
+ 80005b2:	701a      	strb	r2, [r3, #0]
+
+        if (musicaActiva)                                               // Comprueba si alguna música debe continuar.
+ 80005b4:	4b23      	ldr	r3, [pc, #140]	@ (8000644 <Sonido_Actualizar+0x100>)
+ 80005b6:	781b      	ldrb	r3, [r3, #0]
+ 80005b8:	2b00      	cmp	r3, #0
+ 80005ba:	d003      	beq.n	80005c4 <Sonido_Actualizar+0x80>
+        {
+            Sonido_NotaMusica(ahora);                                   // Retoma la melodía seleccionada.
+ 80005bc:	6878      	ldr	r0, [r7, #4]
+ 80005be:	f7ff fedb 	bl	8000378 <Sonido_NotaMusica>
+        else
+        {
+            Sonido_Tono(0U, 0U);                                        // Mantiene silencio si la música estaba detenida.
+        }
+
+        return;
+ 80005c2:	e02f      	b.n	8000624 <Sonido_Actualizar+0xe0>
+            Sonido_Tono(0U, 0U);                                        // Mantiene silencio si la música estaba detenida.
+ 80005c4:	2100      	movs	r1, #0
+ 80005c6:	2000      	movs	r0, #0
+ 80005c8:	f7ff fe34 	bl	8000234 <Sonido_Tono>
+        return;
+ 80005cc:	e02a      	b.n	8000624 <Sonido_Actualizar+0xe0>
+    /* --------------------------------------------------------
+     * MUSICA DE FONDO
+     * -------------------------------------------------------- */
+
+    if (
+        musicaActiva &&
+ 80005ce:	4b1d      	ldr	r3, [pc, #116]	@ (8000644 <Sonido_Actualizar+0x100>)
+ 80005d0:	781b      	ldrb	r3, [r3, #0]
+    if (
+ 80005d2:	2b00      	cmp	r3, #0
+ 80005d4:	d026      	beq.n	8000624 <Sonido_Actualizar+0xe0>
+        (int32_t)(ahora - musicaFin) >= 0
+ 80005d6:	4b1c      	ldr	r3, [pc, #112]	@ (8000648 <Sonido_Actualizar+0x104>)
+ 80005d8:	681b      	ldr	r3, [r3, #0]
+ 80005da:	687a      	ldr	r2, [r7, #4]
+ 80005dc:	1ad3      	subs	r3, r2, r3
+        musicaActiva &&
+ 80005de:	2b00      	cmp	r3, #0
+ 80005e0:	db20      	blt.n	8000624 <Sonido_Actualizar+0xe0>
+    )                                                                   // Avanza cuando la nota actual ya cumplió su duración.
+    {
+        musicaIdx++;                                                    // Selecciona la siguiente nota.
+ 80005e2:	4b1a      	ldr	r3, [pc, #104]	@ (800064c <Sonido_Actualizar+0x108>)
+ 80005e4:	781b      	ldrb	r3, [r3, #0]
+ 80005e6:	3301      	adds	r3, #1
+ 80005e8:	b2da      	uxtb	r2, r3
+ 80005ea:	4b18      	ldr	r3, [pc, #96]	@ (800064c <Sonido_Actualizar+0x108>)
+ 80005ec:	701a      	strb	r2, [r3, #0]
+
+        uint8_t cantidad =
+            modoMenu
+                ? (uint8_t)(sizeof(musicaMenu) / sizeof(musicaMenu[0]))
+ 80005ee:	4b18      	ldr	r3, [pc, #96]	@ (8000650 <Sonido_Actualizar+0x10c>)
+ 80005f0:	781b      	ldrb	r3, [r3, #0]
+        uint8_t cantidad =
+ 80005f2:	2b00      	cmp	r3, #0
+ 80005f4:	d107      	bne.n	8000606 <Sonido_Actualizar+0xc2>
+                : (modoMartillo
+                    ? (uint8_t)(sizeof(musicaMartillo) / sizeof(musicaMartillo[0]))
+ 80005f6:	4b17      	ldr	r3, [pc, #92]	@ (8000654 <Sonido_Actualizar+0x110>)
+ 80005f8:	781b      	ldrb	r3, [r3, #0]
+        uint8_t cantidad =
+ 80005fa:	2b00      	cmp	r3, #0
+ 80005fc:	d001      	beq.n	8000602 <Sonido_Actualizar+0xbe>
+ 80005fe:	230c      	movs	r3, #12
+ 8000600:	e002      	b.n	8000608 <Sonido_Actualizar+0xc4>
+ 8000602:	231d      	movs	r3, #29
+ 8000604:	e000      	b.n	8000608 <Sonido_Actualizar+0xc4>
+ 8000606:	231c      	movs	r3, #28
+ 8000608:	73fb      	strb	r3, [r7, #15]
+                    : (uint8_t)(sizeof(musicaJuego) / sizeof(musicaJuego[0]))); // Obtiene el tamaño de la melodía que está activa.
+
+        if (musicaIdx >= cantidad)                                      // Comprueba si llegó al final del arreglo de notas.
+ 800060a:	4b10      	ldr	r3, [pc, #64]	@ (800064c <Sonido_Actualizar+0x108>)
+ 800060c:	781b      	ldrb	r3, [r3, #0]
+ 800060e:	7bfa      	ldrb	r2, [r7, #15]
+ 8000610:	429a      	cmp	r2, r3
+ 8000612:	d802      	bhi.n	800061a <Sonido_Actualizar+0xd6>
+        {
+            musicaIdx = 0;                                              // Regresa al inicio para repetir la melodía en bucle.
+ 8000614:	4b0d      	ldr	r3, [pc, #52]	@ (800064c <Sonido_Actualizar+0x108>)
+ 8000616:	2200      	movs	r2, #0
+ 8000618:	701a      	strb	r2, [r3, #0]
+        }
+
+        Sonido_NotaMusica(ahora);                                       // Reproduce la siguiente nota y programa su final.
+ 800061a:	6878      	ldr	r0, [r7, #4]
+ 800061c:	f7ff feac 	bl	8000378 <Sonido_NotaMusica>
+ 8000620:	e000      	b.n	8000624 <Sonido_Actualizar+0xe0>
+            return;                                                     // Mantiene la misma frecuencia hasta llegar a sfxFin.
+ 8000622:	bf00      	nop
+    }
+}
+ 8000624:	3710      	adds	r7, #16
+ 8000626:	46bd      	mov	sp, r7
+ 8000628:	bd80      	pop	{r7, pc}
+ 800062a:	bf00      	nop
+ 800062c:	2000002e 	.word	0x2000002e
+ 8000630:	20000030 	.word	0x20000030
+ 8000634:	2000002d 	.word	0x2000002d
+ 8000638:	2000002c 	.word	0x2000002c
+ 800063c:	20000028 	.word	0x20000028
+ 8000640:	2000002f 	.word	0x2000002f
+ 8000644:	20000034 	.word	0x20000034
+ 8000648:	20000038 	.word	0x20000038
+ 800064c:	20000037 	.word	0x20000037
+ 8000650:	20000036 	.word	0x20000036
+ 8000654:	20000035 	.word	0x20000035
+
+08000658 <Audio_LED_Init>:
+ * LD2 en PA5 se enciende durante 140 ms cuando llega una
+ * trama válida. Sirve para verificar visualmente el enlace.
+ * ============================================================ */
+
+static void Audio_LED_Init(void)
+{
+ 8000658:	b580      	push	{r7, lr}
+ 800065a:	b086      	sub	sp, #24
+ 800065c:	af00      	add	r7, sp, #0
+    __HAL_RCC_GPIOA_CLK_ENABLE();                                       // Habilita el reloj de GPIOA.
+ 800065e:	2300      	movs	r3, #0
+ 8000660:	603b      	str	r3, [r7, #0]
+ 8000662:	4b14      	ldr	r3, [pc, #80]	@ (80006b4 <Audio_LED_Init+0x5c>)
+ 8000664:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 8000666:	4a13      	ldr	r2, [pc, #76]	@ (80006b4 <Audio_LED_Init+0x5c>)
+ 8000668:	f043 0301 	orr.w	r3, r3, #1
+ 800066c:	6313      	str	r3, [r2, #48]	@ 0x30
+ 800066e:	4b11      	ldr	r3, [pc, #68]	@ (80006b4 <Audio_LED_Init+0x5c>)
+ 8000670:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 8000672:	f003 0301 	and.w	r3, r3, #1
+ 8000676:	603b      	str	r3, [r7, #0]
+ 8000678:	683b      	ldr	r3, [r7, #0]
+
+    GPIO_InitTypeDef gpio = {0};                                        // Crea una estructura limpia de configuración GPIO.
+ 800067a:	1d3b      	adds	r3, r7, #4
+ 800067c:	2200      	movs	r2, #0
+ 800067e:	601a      	str	r2, [r3, #0]
+ 8000680:	605a      	str	r2, [r3, #4]
+ 8000682:	609a      	str	r2, [r3, #8]
+ 8000684:	60da      	str	r2, [r3, #12]
+ 8000686:	611a      	str	r2, [r3, #16]
+
+    gpio.Pin = GPIO_PIN_5;                                              // Selecciona PA5, conectado al LED LD2.
+ 8000688:	2320      	movs	r3, #32
+ 800068a:	607b      	str	r3, [r7, #4]
+    gpio.Mode = GPIO_MODE_OUTPUT_PP;                                    // Configura PA5 como salida digital push-pull.
+ 800068c:	2301      	movs	r3, #1
+ 800068e:	60bb      	str	r3, [r7, #8]
+    gpio.Pull = GPIO_NOPULL;                                            // No utiliza resistencias internas.
+ 8000690:	2300      	movs	r3, #0
+ 8000692:	60fb      	str	r3, [r7, #12]
+    gpio.Speed = GPIO_SPEED_FREQ_LOW;                                   // Velocidad baja es suficiente para un LED.
+ 8000694:	2300      	movs	r3, #0
+ 8000696:	613b      	str	r3, [r7, #16]
+
+    HAL_GPIO_Init(GPIOA, &gpio);                                        // Aplica la configuración a PA5.
+ 8000698:	1d3b      	adds	r3, r7, #4
+ 800069a:	4619      	mov	r1, r3
+ 800069c:	4806      	ldr	r0, [pc, #24]	@ (80006b8 <Audio_LED_Init+0x60>)
+ 800069e:	f000 fb9d 	bl	8000ddc <HAL_GPIO_Init>
+    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_5, GPIO_PIN_RESET);               // Inicia el LED apagado.
+ 80006a2:	2200      	movs	r2, #0
+ 80006a4:	2120      	movs	r1, #32
+ 80006a6:	4804      	ldr	r0, [pc, #16]	@ (80006b8 <Audio_LED_Init+0x60>)
+ 80006a8:	f000 fd2c 	bl	8001104 <HAL_GPIO_WritePin>
+}
+ 80006ac:	bf00      	nop
+ 80006ae:	3718      	adds	r7, #24
+ 80006b0:	46bd      	mov	sp, r7
+ 80006b2:	bd80      	pop	{r7, pc}
+ 80006b4:	40023800 	.word	0x40023800
+ 80006b8:	40020000 	.word	0x40020000
+
+080006bc <Audio_Comando>:
+ * Así se evita reiniciar la melodía cada vez que la STM32
+ * principal vuelve a enviar el mismo estado.
+ * ============================================================ */
+
+static void Audio_Comando(uint8_t cmd)
+{
+ 80006bc:	b580      	push	{r7, lr}
+ 80006be:	b082      	sub	sp, #8
+ 80006c0:	af00      	add	r7, sp, #0
+ 80006c2:	4603      	mov	r3, r0
+ 80006c4:	71fb      	strb	r3, [r7, #7]
+    enlaceRecibido = 1;                                                 // Desactiva el autotest repetitivo después del primer comando válido.
+ 80006c6:	4b48      	ldr	r3, [pc, #288]	@ (80007e8 <Audio_Comando+0x12c>)
+ 80006c8:	2201      	movs	r2, #1
+ 80006ca:	701a      	strb	r2, [r3, #0]
+
+    HAL_GPIO_WritePin(
+ 80006cc:	2201      	movs	r2, #1
+ 80006ce:	2120      	movs	r1, #32
+ 80006d0:	4846      	ldr	r0, [pc, #280]	@ (80007ec <Audio_Comando+0x130>)
+ 80006d2:	f000 fd17 	bl	8001104 <HAL_GPIO_WritePin>
+        GPIO_PIN_5,
+        GPIO_PIN_SET
+    );                                                                  // Enciende LD2 para indicar recepción correcta.
+
+    ledHasta =
+        HAL_GetTick() + 140U;                                           // Programa el apagado automático del LED en 140 ms.
+ 80006d6:	f000 fa8f 	bl	8000bf8 <HAL_GetTick>
+ 80006da:	4603      	mov	r3, r0
+ 80006dc:	338c      	adds	r3, #140	@ 0x8c
+    ledHasta =
+ 80006de:	4a44      	ldr	r2, [pc, #272]	@ (80007f0 <Audio_Comando+0x134>)
+ 80006e0:	6013      	str	r3, [r2, #0]
+
+    /* --------------------------------------------------------
+     * 0x23 - ESTADO DE MUSICA NORMAL
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x23U)
+ 80006e2:	79fb      	ldrb	r3, [r7, #7]
+ 80006e4:	2b23      	cmp	r3, #35	@ 0x23
+ 80006e6:	d10e      	bne.n	8000706 <Audio_Comando+0x4a>
+    {
+        if (!musicaActiva || modoMartillo || modoMenu)
+ 80006e8:	4b42      	ldr	r3, [pc, #264]	@ (80007f4 <Audio_Comando+0x138>)
+ 80006ea:	781b      	ldrb	r3, [r3, #0]
+ 80006ec:	2b00      	cmp	r3, #0
+ 80006ee:	d007      	beq.n	8000700 <Audio_Comando+0x44>
+ 80006f0:	4b41      	ldr	r3, [pc, #260]	@ (80007f8 <Audio_Comando+0x13c>)
+ 80006f2:	781b      	ldrb	r3, [r3, #0]
+ 80006f4:	2b00      	cmp	r3, #0
+ 80006f6:	d103      	bne.n	8000700 <Audio_Comando+0x44>
+ 80006f8:	4b40      	ldr	r3, [pc, #256]	@ (80007fc <Audio_Comando+0x140>)
+ 80006fa:	781b      	ldrb	r3, [r3, #0]
+ 80006fc:	2b00      	cmp	r3, #0
+ 80006fe:	d069      	beq.n	80007d4 <Audio_Comando+0x118>
+            Musica_Iniciar();                                           // Cambia a música normal solo si el estado actual es diferente.
+ 8000700:	f7ff fec4 	bl	800048c <Musica_Iniciar>
+
+        return;
+ 8000704:	e066      	b.n	80007d4 <Audio_Comando+0x118>
+
+    /* --------------------------------------------------------
+     * 0x24 - ESTADO DE MUSICA DEL MARTILLO
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x24U)
+ 8000706:	79fb      	ldrb	r3, [r7, #7]
+ 8000708:	2b24      	cmp	r3, #36	@ 0x24
+ 800070a:	d122      	bne.n	8000752 <Audio_Comando+0x96>
+    {
+        if (!musicaActiva || !modoMartillo || modoMenu)
+ 800070c:	4b39      	ldr	r3, [pc, #228]	@ (80007f4 <Audio_Comando+0x138>)
+ 800070e:	781b      	ldrb	r3, [r3, #0]
+ 8000710:	2b00      	cmp	r3, #0
+ 8000712:	d007      	beq.n	8000724 <Audio_Comando+0x68>
+ 8000714:	4b38      	ldr	r3, [pc, #224]	@ (80007f8 <Audio_Comando+0x13c>)
+ 8000716:	781b      	ldrb	r3, [r3, #0]
+ 8000718:	2b00      	cmp	r3, #0
+ 800071a:	d003      	beq.n	8000724 <Audio_Comando+0x68>
+ 800071c:	4b37      	ldr	r3, [pc, #220]	@ (80007fc <Audio_Comando+0x140>)
+ 800071e:	781b      	ldrb	r3, [r3, #0]
+ 8000720:	2b00      	cmp	r3, #0
+ 8000722:	d059      	beq.n	80007d8 <Audio_Comando+0x11c>
+        {
+            modoMenu = 0U;                                              // Sale del modo de menú.
+ 8000724:	4b35      	ldr	r3, [pc, #212]	@ (80007fc <Audio_Comando+0x140>)
+ 8000726:	2200      	movs	r2, #0
+ 8000728:	701a      	strb	r2, [r3, #0]
+            modoMartillo = 1U;                                          // Selecciona la melodía del martillo.
+ 800072a:	4b33      	ldr	r3, [pc, #204]	@ (80007f8 <Audio_Comando+0x13c>)
+ 800072c:	2201      	movs	r2, #1
+ 800072e:	701a      	strb	r2, [r3, #0]
+            musicaActiva = 1U;                                          // Mantiene la música habilitada.
+ 8000730:	4b30      	ldr	r3, [pc, #192]	@ (80007f4 <Audio_Comando+0x138>)
+ 8000732:	2201      	movs	r2, #1
+ 8000734:	701a      	strb	r2, [r3, #0]
+            musicaIdx = 0U;                                             // Comienza el modo martillo desde el inicio.
+ 8000736:	4b32      	ldr	r3, [pc, #200]	@ (8000800 <Audio_Comando+0x144>)
+ 8000738:	2200      	movs	r2, #0
+ 800073a:	701a      	strb	r2, [r3, #0]
+
+            if (!sfxActivo)
+ 800073c:	4b31      	ldr	r3, [pc, #196]	@ (8000804 <Audio_Comando+0x148>)
+ 800073e:	781b      	ldrb	r3, [r3, #0]
+ 8000740:	2b00      	cmp	r3, #0
+ 8000742:	d149      	bne.n	80007d8 <Audio_Comando+0x11c>
+                Sonido_NotaMusica(HAL_GetTick());                       // Inicia la melodía solo si no existe un efecto prioritario.
+ 8000744:	f000 fa58 	bl	8000bf8 <HAL_GetTick>
+ 8000748:	4603      	mov	r3, r0
+ 800074a:	4618      	mov	r0, r3
+ 800074c:	f7ff fe14 	bl	8000378 <Sonido_NotaMusica>
+        }
+
+        return;
+ 8000750:	e042      	b.n	80007d8 <Audio_Comando+0x11c>
+
+    /* --------------------------------------------------------
+     * 0x20 - INICIAR MUSICA NORMAL
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x20U)
+ 8000752:	79fb      	ldrb	r3, [r7, #7]
+ 8000754:	2b20      	cmp	r3, #32
+ 8000756:	d102      	bne.n	800075e <Audio_Comando+0xa2>
+    {
+        Musica_Iniciar();                                               // Reinicia explícitamente musicaJuego.
+ 8000758:	f7ff fe98 	bl	800048c <Musica_Iniciar>
+        return;
+ 800075c:	e041      	b.n	80007e2 <Audio_Comando+0x126>
+
+    /* --------------------------------------------------------
+     * 0x21 - DETENER MUSICA
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x21U)
+ 800075e:	79fb      	ldrb	r3, [r7, #7]
+ 8000760:	2b21      	cmp	r3, #33	@ 0x21
+ 8000762:	d102      	bne.n	800076a <Audio_Comando+0xae>
+    {
+        Musica_Detener();                                               // Apaga la música después del efecto activo, si existe.
+ 8000764:	f7ff feda 	bl	800051c <Musica_Detener>
+        return;
+ 8000768:	e03b      	b.n	80007e2 <Audio_Comando+0x126>
+
+    /* --------------------------------------------------------
+     * 0x25 - ESTADO DE MUSICA DEL MENU
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x25U)
+ 800076a:	79fb      	ldrb	r3, [r7, #7]
+ 800076c:	2b25      	cmp	r3, #37	@ 0x25
+ 800076e:	d10a      	bne.n	8000786 <Audio_Comando+0xca>
+    {
+        if (!musicaActiva || !modoMenu)
+ 8000770:	4b20      	ldr	r3, [pc, #128]	@ (80007f4 <Audio_Comando+0x138>)
+ 8000772:	781b      	ldrb	r3, [r3, #0]
+ 8000774:	2b00      	cmp	r3, #0
+ 8000776:	d003      	beq.n	8000780 <Audio_Comando+0xc4>
+ 8000778:	4b20      	ldr	r3, [pc, #128]	@ (80007fc <Audio_Comando+0x140>)
+ 800077a:	781b      	ldrb	r3, [r3, #0]
+ 800077c:	2b00      	cmp	r3, #0
+ 800077e:	d12d      	bne.n	80007dc <Audio_Comando+0x120>
+            Musica_IniciarMenu();                                       // Entra al menú sin reiniciar la melodía si ya está sonando.
+ 8000780:	f7ff fea8 	bl	80004d4 <Musica_IniciarMenu>
+
+        return;
+ 8000784:	e02a      	b.n	80007dc <Audio_Comando+0x120>
+
+    /* --------------------------------------------------------
+     * 0x22 - REINICIAR MUSICA DEL MARTILLO
+     * -------------------------------------------------------- */
+
+    if (cmd == 0x22U)
+ 8000786:	79fb      	ldrb	r3, [r7, #7]
+ 8000788:	2b22      	cmp	r3, #34	@ 0x22
+ 800078a:	d116      	bne.n	80007ba <Audio_Comando+0xfe>
+    {
+        modoMenu = 0U;                                                  // Sale del modo de menú.
+ 800078c:	4b1b      	ldr	r3, [pc, #108]	@ (80007fc <Audio_Comando+0x140>)
+ 800078e:	2200      	movs	r2, #0
+ 8000790:	701a      	strb	r2, [r3, #0]
+        modoMartillo = 1U;                                              // Selecciona la música del martillo.
+ 8000792:	4b19      	ldr	r3, [pc, #100]	@ (80007f8 <Audio_Comando+0x13c>)
+ 8000794:	2201      	movs	r2, #1
+ 8000796:	701a      	strb	r2, [r3, #0]
+        musicaActiva = 1U;                                              // Activa la reproducción.
+ 8000798:	4b16      	ldr	r3, [pc, #88]	@ (80007f4 <Audio_Comando+0x138>)
+ 800079a:	2201      	movs	r2, #1
+ 800079c:	701a      	strb	r2, [r3, #0]
+        musicaIdx = 0U;                                                 // Fuerza el reinicio desde la primera nota.
+ 800079e:	4b18      	ldr	r3, [pc, #96]	@ (8000800 <Audio_Comando+0x144>)
+ 80007a0:	2200      	movs	r2, #0
+ 80007a2:	701a      	strb	r2, [r3, #0]
+
+        if (!sfxActivo)
+ 80007a4:	4b17      	ldr	r3, [pc, #92]	@ (8000804 <Audio_Comando+0x148>)
+ 80007a6:	781b      	ldrb	r3, [r3, #0]
+ 80007a8:	2b00      	cmp	r3, #0
+ 80007aa:	d119      	bne.n	80007e0 <Audio_Comando+0x124>
+            Sonido_NotaMusica(HAL_GetTick());                           // La reproduce inmediatamente si ningún SFX está activo.
+ 80007ac:	f000 fa24 	bl	8000bf8 <HAL_GetTick>
+ 80007b0:	4603      	mov	r3, r0
+ 80007b2:	4618      	mov	r0, r3
+ 80007b4:	f7ff fde0 	bl	8000378 <Sonido_NotaMusica>
+
+        return;
+ 80007b8:	e012      	b.n	80007e0 <Audio_Comando+0x124>
+
+    /* --------------------------------------------------------
+     * 0x01..0x0A - EFECTOS DE SONIDO
+     * -------------------------------------------------------- */
+
+    if (cmd >= 1U && cmd <= SFX_NUM)
+ 80007ba:	79fb      	ldrb	r3, [r7, #7]
+ 80007bc:	2b00      	cmp	r3, #0
+ 80007be:	d010      	beq.n	80007e2 <Audio_Comando+0x126>
+ 80007c0:	79fb      	ldrb	r3, [r7, #7]
+ 80007c2:	2b0a      	cmp	r3, #10
+ 80007c4:	d80d      	bhi.n	80007e2 <Audio_Comando+0x126>
+        Sonido_Efecto((EfectoSonido)(cmd - 1U));                        // Convierte el comando UART al índice correspondiente de EfectoSonido.
+ 80007c6:	79fb      	ldrb	r3, [r7, #7]
+ 80007c8:	3b01      	subs	r3, #1
+ 80007ca:	b2db      	uxtb	r3, r3
+ 80007cc:	4618      	mov	r0, r3
+ 80007ce:	f7ff fe0d 	bl	80003ec <Sonido_Efecto>
+ 80007d2:	e006      	b.n	80007e2 <Audio_Comando+0x126>
+        return;
+ 80007d4:	bf00      	nop
+ 80007d6:	e004      	b.n	80007e2 <Audio_Comando+0x126>
+        return;
+ 80007d8:	bf00      	nop
+ 80007da:	e002      	b.n	80007e2 <Audio_Comando+0x126>
+        return;
+ 80007dc:	bf00      	nop
+ 80007de:	e000      	b.n	80007e2 <Audio_Comando+0x126>
+        return;
+ 80007e0:	bf00      	nop
+}
+ 80007e2:	3708      	adds	r7, #8
+ 80007e4:	46bd      	mov	sp, r7
+ 80007e6:	bd80      	pop	{r7, pc}
+ 80007e8:	2000003e 	.word	0x2000003e
+ 80007ec:	40020000 	.word	0x40020000
+ 80007f0:	20000040 	.word	0x20000040
+ 80007f4:	20000034 	.word	0x20000034
+ 80007f8:	20000035 	.word	0x20000035
+ 80007fc:	20000036 	.word	0x20000036
+ 8000800:	20000037 	.word	0x20000037
+ 8000804:	2000002e 	.word	0x2000002e
+
+08000808 <Audio_Byte>:
+ *
+ * Solo una trama completa y correcta llega a Audio_Comando().
+ * ============================================================ */
+
+static void Audio_Byte(uint8_t b)
+{
+ 8000808:	b580      	push	{r7, lr}
+ 800080a:	b082      	sub	sp, #8
+ 800080c:	af00      	add	r7, sp, #0
+ 800080e:	4603      	mov	r3, r0
+ 8000810:	71fb      	strb	r3, [r7, #7]
+    if (rxEstado == 0U)                                                 // Estado inicial: espera la cabecera.
+ 8000812:	4b19      	ldr	r3, [pc, #100]	@ (8000878 <Audio_Byte+0x70>)
+ 8000814:	781b      	ldrb	r3, [r3, #0]
+ 8000816:	2b00      	cmp	r3, #0
+ 8000818:	d106      	bne.n	8000828 <Audio_Byte+0x20>
+    {
+        if (b == 0xA5U)
+ 800081a:	79fb      	ldrb	r3, [r7, #7]
+ 800081c:	2ba5      	cmp	r3, #165	@ 0xa5
+ 800081e:	d127      	bne.n	8000870 <Audio_Byte+0x68>
+            rxEstado = 1U;                                              // Una cabecera válida hace que el siguiente byte sea tratado como comando.
+ 8000820:	4b15      	ldr	r3, [pc, #84]	@ (8000878 <Audio_Byte+0x70>)
+ 8000822:	2201      	movs	r2, #1
+ 8000824:	701a      	strb	r2, [r3, #0]
+ 8000826:	e023      	b.n	8000870 <Audio_Byte+0x68>
+    }
+    else if (rxEstado == 1U)                                            // Ya se recibió la cabecera.
+ 8000828:	4b13      	ldr	r3, [pc, #76]	@ (8000878 <Audio_Byte+0x70>)
+ 800082a:	781b      	ldrb	r3, [r3, #0]
+ 800082c:	2b01      	cmp	r3, #1
+ 800082e:	d109      	bne.n	8000844 <Audio_Byte+0x3c>
+    {
+        if (b == 0xA5U)
+ 8000830:	79fb      	ldrb	r3, [r7, #7]
+ 8000832:	2ba5      	cmp	r3, #165	@ 0xa5
+ 8000834:	d01b      	beq.n	800086e <Audio_Byte+0x66>
+            return;                                                     // Ignora cabeceras repetidas y continúa esperando el comando.
+
+        rxComando = b;                                                  // Guarda el byte que representa la acción de audio.
+ 8000836:	4a11      	ldr	r2, [pc, #68]	@ (800087c <Audio_Byte+0x74>)
+ 8000838:	79fb      	ldrb	r3, [r7, #7]
+ 800083a:	7013      	strb	r3, [r2, #0]
+        rxEstado = 2U;                                                  // El siguiente byte deberá validar este comando.
+ 800083c:	4b0e      	ldr	r3, [pc, #56]	@ (8000878 <Audio_Byte+0x70>)
+ 800083e:	2202      	movs	r2, #2
+ 8000840:	701a      	strb	r2, [r3, #0]
+ 8000842:	e015      	b.n	8000870 <Audio_Byte+0x68>
+    }
+    else                                                                // Estado 2: espera el byte de comprobación.
+    {
+        if (b == (uint8_t)(rxComando ^ 0xFFU))
+ 8000844:	4b0d      	ldr	r3, [pc, #52]	@ (800087c <Audio_Byte+0x74>)
+ 8000846:	781b      	ldrb	r3, [r3, #0]
+ 8000848:	43db      	mvns	r3, r3
+ 800084a:	b2db      	uxtb	r3, r3
+ 800084c:	79fa      	ldrb	r2, [r7, #7]
+ 800084e:	429a      	cmp	r2, r3
+ 8000850:	d104      	bne.n	800085c <Audio_Byte+0x54>
+            Audio_Comando(rxComando);                                   // Ejecuta el comando únicamente si el complemento es correcto.
+ 8000852:	4b0a      	ldr	r3, [pc, #40]	@ (800087c <Audio_Byte+0x74>)
+ 8000854:	781b      	ldrb	r3, [r3, #0]
+ 8000856:	4618      	mov	r0, r3
+ 8000858:	f7ff ff30 	bl	80006bc <Audio_Comando>
+
+        rxEstado =
+ 800085c:	79fb      	ldrb	r3, [r7, #7]
+ 800085e:	2ba5      	cmp	r3, #165	@ 0xa5
+ 8000860:	d101      	bne.n	8000866 <Audio_Byte+0x5e>
+ 8000862:	2201      	movs	r2, #1
+ 8000864:	e000      	b.n	8000868 <Audio_Byte+0x60>
+ 8000866:	2200      	movs	r2, #0
+ 8000868:	4b03      	ldr	r3, [pc, #12]	@ (8000878 <Audio_Byte+0x70>)
+ 800086a:	701a      	strb	r2, [r3, #0]
+ 800086c:	e000      	b.n	8000870 <Audio_Byte+0x68>
+            return;                                                     // Ignora cabeceras repetidas y continúa esperando el comando.
+ 800086e:	bf00      	nop
+            b == 0xA5U ? 1U : 0U;                                      // Si el último byte también es cabecera, comienza una nueva trama; si no, reinicia.
+    }
+}
+ 8000870:	3708      	adds	r7, #8
+ 8000872:	46bd      	mov	sp, r7
+ 8000874:	bd80      	pop	{r7, pc}
+ 8000876:	bf00      	nop
+ 8000878:	2000003c 	.word	0x2000003c
+ 800087c:	2000003d 	.word	0x2000003d
+
+08000880 <Audio_UART_Init>:
+ * Solo se habilita recepción porque esta Nucleo de audio
+ * no necesita responder por UART.
+ * ============================================================ */
+
+static void Audio_UART_Init(void)
+{
+ 8000880:	b580      	push	{r7, lr}
+ 8000882:	b088      	sub	sp, #32
+ 8000884:	af00      	add	r7, sp, #0
+    __HAL_RCC_GPIOC_CLK_ENABLE();                                       // Habilita el reloj del puerto C.
+ 8000886:	2300      	movs	r3, #0
+ 8000888:	60bb      	str	r3, [r7, #8]
+ 800088a:	4b27      	ldr	r3, [pc, #156]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 800088c:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 800088e:	4a26      	ldr	r2, [pc, #152]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 8000890:	f043 0304 	orr.w	r3, r3, #4
+ 8000894:	6313      	str	r3, [r2, #48]	@ 0x30
+ 8000896:	4b24      	ldr	r3, [pc, #144]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 8000898:	6b1b      	ldr	r3, [r3, #48]	@ 0x30
+ 800089a:	f003 0304 	and.w	r3, r3, #4
+ 800089e:	60bb      	str	r3, [r7, #8]
+ 80008a0:	68bb      	ldr	r3, [r7, #8]
+    __HAL_RCC_USART3_CLK_ENABLE();                                      // Habilita el periférico USART3.
+ 80008a2:	2300      	movs	r3, #0
+ 80008a4:	607b      	str	r3, [r7, #4]
+ 80008a6:	4b20      	ldr	r3, [pc, #128]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 80008a8:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 80008aa:	4a1f      	ldr	r2, [pc, #124]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 80008ac:	f443 2380 	orr.w	r3, r3, #262144	@ 0x40000
+ 80008b0:	6413      	str	r3, [r2, #64]	@ 0x40
+ 80008b2:	4b1d      	ldr	r3, [pc, #116]	@ (8000928 <Audio_UART_Init+0xa8>)
+ 80008b4:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 80008b6:	f403 2380 	and.w	r3, r3, #262144	@ 0x40000
+ 80008ba:	607b      	str	r3, [r7, #4]
+ 80008bc:	687b      	ldr	r3, [r7, #4]
+
+    GPIO_InitTypeDef gpio = {0};                                        // Estructura usada para configurar PC11.
+ 80008be:	f107 030c 	add.w	r3, r7, #12
+ 80008c2:	2200      	movs	r2, #0
+ 80008c4:	601a      	str	r2, [r3, #0]
+ 80008c6:	605a      	str	r2, [r3, #4]
+ 80008c8:	609a      	str	r2, [r3, #8]
+ 80008ca:	60da      	str	r2, [r3, #12]
+ 80008cc:	611a      	str	r2, [r3, #16]
+
+    gpio.Pin = GPIO_PIN_11;                                             // Selecciona PC11.
+ 80008ce:	f44f 6300 	mov.w	r3, #2048	@ 0x800
+ 80008d2:	60fb      	str	r3, [r7, #12]
+    gpio.Mode = GPIO_MODE_AF_PP;                                        // Usa función alternativa para conectar el pin con USART3.
+ 80008d4:	2302      	movs	r3, #2
+ 80008d6:	613b      	str	r3, [r7, #16]
+    gpio.Pull = GPIO_PULLUP;                                            // Mantiene RX en nivel alto cuando no se recibe información.
+ 80008d8:	2301      	movs	r3, #1
+ 80008da:	617b      	str	r3, [r7, #20]
+    gpio.Speed = GPIO_SPEED_FREQ_HIGH;                                  // Permite cambios rápidos de la señal UART.
+ 80008dc:	2302      	movs	r3, #2
+ 80008de:	61bb      	str	r3, [r7, #24]
+    gpio.Alternate = GPIO_AF7_USART3;                                   // AF7 conecta PC11 con USART3_RX.
+ 80008e0:	2307      	movs	r3, #7
+ 80008e2:	61fb      	str	r3, [r7, #28]
+
+    HAL_GPIO_Init(GPIOC, &gpio);                                        // Aplica la configuración de PC11.
+ 80008e4:	f107 030c 	add.w	r3, r7, #12
+ 80008e8:	4619      	mov	r1, r3
+ 80008ea:	4810      	ldr	r0, [pc, #64]	@ (800092c <Audio_UART_Init+0xac>)
+ 80008ec:	f000 fa76 	bl	8000ddc <HAL_GPIO_Init>
+
+    USART3->CR1 = 0U;                                                   // Limpia la configuración anterior de control 1.
+ 80008f0:	4b0f      	ldr	r3, [pc, #60]	@ (8000930 <Audio_UART_Init+0xb0>)
+ 80008f2:	2200      	movs	r2, #0
+ 80008f4:	60da      	str	r2, [r3, #12]
+    USART3->CR2 = 0U;                                                   // Limpia la configuración de formato adicional.
+ 80008f6:	4b0e      	ldr	r3, [pc, #56]	@ (8000930 <Audio_UART_Init+0xb0>)
+ 80008f8:	2200      	movs	r2, #0
+ 80008fa:	611a      	str	r2, [r3, #16]
+    USART3->CR3 = 0U;                                                   // Limpia opciones adicionales de USART3.
+ 80008fc:	4b0c      	ldr	r3, [pc, #48]	@ (8000930 <Audio_UART_Init+0xb0>)
+ 80008fe:	2200      	movs	r2, #0
+ 8000900:	615a      	str	r2, [r3, #20]
+
+    USART3->BRR =
+        (HAL_RCC_GetPCLK1Freq() + 4800U) / 9600U;                       // Calcula el divisor necesario para trabajar aproximadamente a 9600 baudios.
+ 8000902:	f000 fc25 	bl	8001150 <HAL_RCC_GetPCLK1Freq>
+ 8000906:	4603      	mov	r3, r0
+ 8000908:	f503 5396 	add.w	r3, r3, #4800	@ 0x12c0
+    USART3->BRR =
+ 800090c:	4a08      	ldr	r2, [pc, #32]	@ (8000930 <Audio_UART_Init+0xb0>)
+        (HAL_RCC_GetPCLK1Freq() + 4800U) / 9600U;                       // Calcula el divisor necesario para trabajar aproximadamente a 9600 baudios.
+ 800090e:	4909      	ldr	r1, [pc, #36]	@ (8000934 <Audio_UART_Init+0xb4>)
+ 8000910:	fba1 1303 	umull	r1, r3, r1, r3
+ 8000914:	0a9b      	lsrs	r3, r3, #10
+    USART3->BRR =
+ 8000916:	6093      	str	r3, [r2, #8]
+
+    USART3->CR1 =
+ 8000918:	4b05      	ldr	r3, [pc, #20]	@ (8000930 <Audio_UART_Init+0xb0>)
+ 800091a:	f242 0204 	movw	r2, #8196	@ 0x2004
+ 800091e:	60da      	str	r2, [r3, #12]
+        USART_CR1_RE |
+        USART_CR1_UE;                                                   // Habilita el receptor y enciende USART3.
+}
+ 8000920:	bf00      	nop
+ 8000922:	3720      	adds	r7, #32
+ 8000924:	46bd      	mov	sp, r7
+ 8000926:	bd80      	pop	{r7, pc}
+ 8000928:	40023800 	.word	0x40023800
+ 800092c:	40020800 	.word	0x40020800
+ 8000930:	40004800 	.word	0x40004800
+ 8000934:	1b4e81b5 	.word	0x1b4e81b5
+
+08000938 <main>:
+ * 3. Ejecutar el autotest de audio hasta recibir el primer
+ *    comando desde la STM32 principal.
+ * ============================================================ */
+
+int main(void)
+{
+ 8000938:	b580      	push	{r7, lr}
+ 800093a:	b084      	sub	sp, #16
+ 800093c:	af00      	add	r7, sp, #0
+    HAL_Init();                                                         // Inicializa HAL, SysTick y recursos básicos de la STM32.
+ 800093e:	f000 f8f5 	bl	8000b2c <HAL_Init>
+
+    /* --------------------------------------------------------
+     * INICIALIZACION DEL SISTEMA DE AUDIO
+     * -------------------------------------------------------- */
+
+    Audio_LED_Init();                                                   // Prepara LD2 para confirmar tramas válidas.
+ 8000942:	f7ff fe89 	bl	8000658 <Audio_LED_Init>
+    Audio_UART_Init();                                                  // Configura PC11 como USART3_RX a 9600 baudios.
+ 8000946:	f7ff ff9b 	bl	8000880 <Audio_UART_Init>
+    Sonido_Init();                                                      // Configura PB8 y TIM4_CH3 para generar PWM.
+ 800094a:	f7ff fc9f 	bl	800028c <Sonido_Init>
+     *
+     * El sonido de inicio se reproduce aun si la STM32 principal
+     * está desconectada. Esto permite verificar buzzer y PWM.
+     * -------------------------------------------------------- */
+
+    Sonido_Efecto(SFX_INICIO);                                          // Reproduce inmediatamente la secuencia de inicio.
+ 800094e:	2004      	movs	r0, #4
+ 8000950:	f7ff fd4c 	bl	80003ec <Sonido_Efecto>
+
+    uint32_t proximaPrueba =
+        HAL_GetTick() + 3000U;                                          // Programa otro autotest dentro de 3 segundos si aún no existe enlace.
+ 8000954:	f000 f950 	bl	8000bf8 <HAL_GetTick>
+ 8000958:	4603      	mov	r3, r0
+    uint32_t proximaPrueba =
+ 800095a:	f603 33b8 	addw	r3, r3, #3000	@ 0xbb8
+ 800095e:	60fb      	str	r3, [r7, #12]
+         * SR indica si llegó un byte o si ocurrió un error.
+         * La lectura de DR obtiene el byte recibido.
+         * ---------------------------------------------------- */
+
+        uint32_t sr =
+            USART3->SR;                                                 // Captura una vez el estado actual de USART3.
+ 8000960:	4b22      	ldr	r3, [pc, #136]	@ (80009ec <main+0xb4>)
+        uint32_t sr =
+ 8000962:	681b      	ldr	r3, [r3, #0]
+ 8000964:	60bb      	str	r3, [r7, #8]
+
+        if (
+            sr &
+ 8000966:	68bb      	ldr	r3, [r7, #8]
+ 8000968:	f003 032e 	and.w	r3, r3, #46	@ 0x2e
+        if (
+ 800096c:	2b00      	cmp	r3, #0
+ 800096e:	d00f      	beq.n	8000990 <main+0x58>
+             USART_SR_FE |
+             USART_SR_NE)
+        )                                                               // Entra si llegó un byte o se detectó overrun, framing o noise error.
+        {
+            uint8_t b =
+                (uint8_t)USART3->DR;                                    // Lee DR; junto con la lectura previa de SR limpia las condiciones de error.
+ 8000970:	4b1e      	ldr	r3, [pc, #120]	@ (80009ec <main+0xb4>)
+ 8000972:	685b      	ldr	r3, [r3, #4]
+            uint8_t b =
+ 8000974:	71fb      	strb	r3, [r7, #7]
+
+            if (sr & (USART_SR_ORE | USART_SR_FE | USART_SR_NE))
+ 8000976:	68bb      	ldr	r3, [r7, #8]
+ 8000978:	f003 030e 	and.w	r3, r3, #14
+ 800097c:	2b00      	cmp	r3, #0
+ 800097e:	d003      	beq.n	8000988 <main+0x50>
+                rxEstado = 0U;                                          // Descarta una trama incompleta si UART reportó un error.
+ 8000980:	4b1b      	ldr	r3, [pc, #108]	@ (80009f0 <main+0xb8>)
+ 8000982:	2200      	movs	r2, #0
+ 8000984:	701a      	strb	r2, [r3, #0]
+ 8000986:	e003      	b.n	8000990 <main+0x58>
+            else
+                Audio_Byte(b);                                          // Entrega el byte válido a la máquina de estados del protocolo.
+ 8000988:	79fb      	ldrb	r3, [r7, #7]
+ 800098a:	4618      	mov	r0, r3
+ 800098c:	f7ff ff3c 	bl	8000808 <Audio_Byte>
+        /* ----------------------------------------------------
+         * ACTUALIZAR AUDIO
+         * ---------------------------------------------------- */
+
+        uint32_t ahora =
+            HAL_GetTick();                                               // Obtiene el tiempo actual una sola vez en esta vuelta.
+ 8000990:	f000 f932 	bl	8000bf8 <HAL_GetTick>
+ 8000994:	6038      	str	r0, [r7, #0]
+
+        Sonido_Actualizar(ahora);                                       // Cambia notas y restaura música sin bloquear el programa.
+ 8000996:	6838      	ldr	r0, [r7, #0]
+ 8000998:	f7ff fdd4 	bl	8000544 <Sonido_Actualizar>
+        /* ----------------------------------------------------
+         * APAGAR LED DE CONFIRMACION
+         * ---------------------------------------------------- */
+
+        if (
+            ledHasta &&
+ 800099c:	4b15      	ldr	r3, [pc, #84]	@ (80009f4 <main+0xbc>)
+ 800099e:	681b      	ldr	r3, [r3, #0]
+        if (
+ 80009a0:	2b00      	cmp	r3, #0
+ 80009a2:	d00d      	beq.n	80009c0 <main+0x88>
+            (int32_t)(ahora - ledHasta) >= 0
+ 80009a4:	4b13      	ldr	r3, [pc, #76]	@ (80009f4 <main+0xbc>)
+ 80009a6:	681b      	ldr	r3, [r3, #0]
+ 80009a8:	683a      	ldr	r2, [r7, #0]
+ 80009aa:	1ad3      	subs	r3, r2, r3
+            ledHasta &&
+ 80009ac:	2b00      	cmp	r3, #0
+ 80009ae:	db07      	blt.n	80009c0 <main+0x88>
+        )
+        {
+            HAL_GPIO_WritePin(
+ 80009b0:	2200      	movs	r2, #0
+ 80009b2:	2120      	movs	r1, #32
+ 80009b4:	4810      	ldr	r0, [pc, #64]	@ (80009f8 <main+0xc0>)
+ 80009b6:	f000 fba5 	bl	8001104 <HAL_GPIO_WritePin>
+                GPIOA,
+                GPIO_PIN_5,
+                GPIO_PIN_RESET
+            );                                                          // Apaga LD2 después de los 140 ms programados.
+
+            ledHasta = 0;                                               // Indica que ya no hay un apagado pendiente.
+ 80009ba:	4b0e      	ldr	r3, [pc, #56]	@ (80009f4 <main+0xbc>)
+ 80009bc:	2200      	movs	r2, #0
+ 80009be:	601a      	str	r2, [r3, #0]
+         * Mientras nunca haya llegado una trama válida, el efecto
+         * de inicio vuelve a sonar cada 3 segundos.
+         * ---------------------------------------------------- */
+
+        if (
+            !enlaceRecibido &&
+ 80009c0:	4b0e      	ldr	r3, [pc, #56]	@ (80009fc <main+0xc4>)
+ 80009c2:	781b      	ldrb	r3, [r3, #0]
+        if (
+ 80009c4:	2b00      	cmp	r3, #0
+ 80009c6:	d1cb      	bne.n	8000960 <main+0x28>
+            (int32_t)(ahora - proximaPrueba) >= 0
+ 80009c8:	683a      	ldr	r2, [r7, #0]
+ 80009ca:	68fb      	ldr	r3, [r7, #12]
+ 80009cc:	1ad3      	subs	r3, r2, r3
+            !enlaceRecibido &&
+ 80009ce:	2b00      	cmp	r3, #0
+ 80009d0:	dbc6      	blt.n	8000960 <main+0x28>
+        )
+        {
+            if (!sfxActivo)
+ 80009d2:	4b0b      	ldr	r3, [pc, #44]	@ (8000a00 <main+0xc8>)
+ 80009d4:	781b      	ldrb	r3, [r3, #0]
+ 80009d6:	2b00      	cmp	r3, #0
+ 80009d8:	d102      	bne.n	80009e0 <main+0xa8>
+                Sonido_Efecto(SFX_INICIO);                              // Reproduce otra prueba únicamente cuando el efecto anterior ya terminó.
+ 80009da:	2004      	movs	r0, #4
+ 80009dc:	f7ff fd06 	bl	80003ec <Sonido_Efecto>
+
+            proximaPrueba =
+ 80009e0:	683b      	ldr	r3, [r7, #0]
+ 80009e2:	f603 33b8 	addw	r3, r3, #3000	@ 0xbb8
+ 80009e6:	60fb      	str	r3, [r7, #12]
+    {
+ 80009e8:	e7ba      	b.n	8000960 <main+0x28>
+ 80009ea:	bf00      	nop
+ 80009ec:	40004800 	.word	0x40004800
+ 80009f0:	2000003c 	.word	0x2000003c
+ 80009f4:	20000040 	.word	0x20000040
+ 80009f8:	40020000 	.word	0x40020000
+ 80009fc:	2000003e 	.word	0x2000003e
+ 8000a00:	2000002e 	.word	0x2000002e
+
+08000a04 <HAL_MspInit>:
+/* USER CODE END 0 */
+/**
+  * Initializes the Global MSP.
+  */
+void HAL_MspInit(void)
+{
+ 8000a04:	b480      	push	{r7}
+ 8000a06:	b083      	sub	sp, #12
+ 8000a08:	af00      	add	r7, sp, #0
+
+  /* USER CODE BEGIN MspInit 0 */
+
+  /* USER CODE END MspInit 0 */
+
+  __HAL_RCC_SYSCFG_CLK_ENABLE();
+ 8000a0a:	2300      	movs	r3, #0
+ 8000a0c:	607b      	str	r3, [r7, #4]
+ 8000a0e:	4b10      	ldr	r3, [pc, #64]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a10:	6c5b      	ldr	r3, [r3, #68]	@ 0x44
+ 8000a12:	4a0f      	ldr	r2, [pc, #60]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a14:	f443 4380 	orr.w	r3, r3, #16384	@ 0x4000
+ 8000a18:	6453      	str	r3, [r2, #68]	@ 0x44
+ 8000a1a:	4b0d      	ldr	r3, [pc, #52]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a1c:	6c5b      	ldr	r3, [r3, #68]	@ 0x44
+ 8000a1e:	f403 4380 	and.w	r3, r3, #16384	@ 0x4000
+ 8000a22:	607b      	str	r3, [r7, #4]
+ 8000a24:	687b      	ldr	r3, [r7, #4]
+  __HAL_RCC_PWR_CLK_ENABLE();
+ 8000a26:	2300      	movs	r3, #0
+ 8000a28:	603b      	str	r3, [r7, #0]
+ 8000a2a:	4b09      	ldr	r3, [pc, #36]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a2c:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 8000a2e:	4a08      	ldr	r2, [pc, #32]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a30:	f043 5380 	orr.w	r3, r3, #268435456	@ 0x10000000
+ 8000a34:	6413      	str	r3, [r2, #64]	@ 0x40
+ 8000a36:	4b06      	ldr	r3, [pc, #24]	@ (8000a50 <HAL_MspInit+0x4c>)
+ 8000a38:	6c1b      	ldr	r3, [r3, #64]	@ 0x40
+ 8000a3a:	f003 5380 	and.w	r3, r3, #268435456	@ 0x10000000
+ 8000a3e:	603b      	str	r3, [r7, #0]
+ 8000a40:	683b      	ldr	r3, [r7, #0]
+  /* System interrupt init*/
+
+  /* USER CODE BEGIN MspInit 1 */
+
+  /* USER CODE END MspInit 1 */
+}
+ 8000a42:	bf00      	nop
+ 8000a44:	370c      	adds	r7, #12
+ 8000a46:	46bd      	mov	sp, r7
+ 8000a48:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000a4c:	4770      	bx	lr
+ 8000a4e:	bf00      	nop
+ 8000a50:	40023800 	.word	0x40023800
+
+08000a54 <NMI_Handler>:
+/******************************************************************************/
+/**
+  * @brief This function handles Non maskable interrupt.
+  */
+void NMI_Handler(void)
+{
+ 8000a54:	b480      	push	{r7}
+ 8000a56:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+
+  /* USER CODE END NonMaskableInt_IRQn 0 */
+  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+   while (1)
+ 8000a58:	bf00      	nop
+ 8000a5a:	e7fd      	b.n	8000a58 <NMI_Handler+0x4>
+
+08000a5c <HardFault_Handler>:
+
+/**
+  * @brief This function handles Hard fault interrupt.
+  */
+void HardFault_Handler(void)
+{
+ 8000a5c:	b480      	push	{r7}
+ 8000a5e:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN HardFault_IRQn 0 */
+
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+ 8000a60:	bf00      	nop
+ 8000a62:	e7fd      	b.n	8000a60 <HardFault_Handler+0x4>
+
+08000a64 <MemManage_Handler>:
+
+/**
+  * @brief This function handles Memory management fault.
+  */
+void MemManage_Handler(void)
+{
+ 8000a64:	b480      	push	{r7}
+ 8000a66:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+
+  /* USER CODE END MemoryManagement_IRQn 0 */
+  while (1)
+ 8000a68:	bf00      	nop
+ 8000a6a:	e7fd      	b.n	8000a68 <MemManage_Handler+0x4>
+
+08000a6c <BusFault_Handler>:
+
+/**
+  * @brief This function handles Pre-fetch fault, memory access fault.
+  */
+void BusFault_Handler(void)
+{
+ 8000a6c:	b480      	push	{r7}
+ 8000a6e:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN BusFault_IRQn 0 */
+
+  /* USER CODE END BusFault_IRQn 0 */
+  while (1)
+ 8000a70:	bf00      	nop
+ 8000a72:	e7fd      	b.n	8000a70 <BusFault_Handler+0x4>
+
+08000a74 <UsageFault_Handler>:
+
+/**
+  * @brief This function handles Undefined instruction or illegal state.
+  */
+void UsageFault_Handler(void)
+{
+ 8000a74:	b480      	push	{r7}
+ 8000a76:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN UsageFault_IRQn 0 */
+
+  /* USER CODE END UsageFault_IRQn 0 */
+  while (1)
+ 8000a78:	bf00      	nop
+ 8000a7a:	e7fd      	b.n	8000a78 <UsageFault_Handler+0x4>
+
+08000a7c <SVC_Handler>:
+
+/**
+  * @brief This function handles System service call via SWI instruction.
+  */
+void SVC_Handler(void)
+{
+ 8000a7c:	b480      	push	{r7}
+ 8000a7e:	af00      	add	r7, sp, #0
+
+  /* USER CODE END SVCall_IRQn 0 */
+  /* USER CODE BEGIN SVCall_IRQn 1 */
+
+  /* USER CODE END SVCall_IRQn 1 */
+}
+ 8000a80:	bf00      	nop
+ 8000a82:	46bd      	mov	sp, r7
+ 8000a84:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000a88:	4770      	bx	lr
+
+08000a8a <DebugMon_Handler>:
+
+/**
+  * @brief This function handles Debug monitor.
+  */
+void DebugMon_Handler(void)
+{
+ 8000a8a:	b480      	push	{r7}
+ 8000a8c:	af00      	add	r7, sp, #0
+
+  /* USER CODE END DebugMonitor_IRQn 0 */
+  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+
+  /* USER CODE END DebugMonitor_IRQn 1 */
+}
+ 8000a8e:	bf00      	nop
+ 8000a90:	46bd      	mov	sp, r7
+ 8000a92:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000a96:	4770      	bx	lr
+
+08000a98 <PendSV_Handler>:
+
+/**
+  * @brief This function handles Pendable request for system service.
+  */
+void PendSV_Handler(void)
+{
+ 8000a98:	b480      	push	{r7}
+ 8000a9a:	af00      	add	r7, sp, #0
+
+  /* USER CODE END PendSV_IRQn 0 */
+  /* USER CODE BEGIN PendSV_IRQn 1 */
+
+  /* USER CODE END PendSV_IRQn 1 */
+}
+ 8000a9c:	bf00      	nop
+ 8000a9e:	46bd      	mov	sp, r7
+ 8000aa0:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000aa4:	4770      	bx	lr
+
+08000aa6 <SysTick_Handler>:
+
+/**
+  * @brief This function handles System tick timer.
+  */
+void SysTick_Handler(void)
+{
+ 8000aa6:	b580      	push	{r7, lr}
+ 8000aa8:	af00      	add	r7, sp, #0
+  /* USER CODE BEGIN SysTick_IRQn 0 */
+
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
+ 8000aaa:	f000 f891 	bl	8000bd0 <HAL_IncTick>
+  /* USER CODE BEGIN SysTick_IRQn 1 */
+
+  /* USER CODE END SysTick_IRQn 1 */
+}
+ 8000aae:	bf00      	nop
+ 8000ab0:	bd80      	pop	{r7, pc}
+	...
+
+08000ab4 <SystemInit>:
+  *         configuration.
+  * @param  None
+  * @retval None
+  */
+void SystemInit(void)
+{
+ 8000ab4:	b480      	push	{r7}
+ 8000ab6:	af00      	add	r7, sp, #0
+  /* FPU settings ------------------------------------------------------------*/
+  #if (__FPU_PRESENT == 1) && (__FPU_USED == 1)
+    SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
+ 8000ab8:	4b06      	ldr	r3, [pc, #24]	@ (8000ad4 <SystemInit+0x20>)
+ 8000aba:	f8d3 3088 	ldr.w	r3, [r3, #136]	@ 0x88
+ 8000abe:	4a05      	ldr	r2, [pc, #20]	@ (8000ad4 <SystemInit+0x20>)
+ 8000ac0:	f443 0370 	orr.w	r3, r3, #15728640	@ 0xf00000
+ 8000ac4:	f8c2 3088 	str.w	r3, [r2, #136]	@ 0x88
+
+  /* Configure the Vector Table location -------------------------------------*/
+#if defined(USER_VECT_TAB_ADDRESS)
+  SCB->VTOR = VECT_TAB_BASE_ADDRESS | VECT_TAB_OFFSET; /* Vector Table Relocation in Internal SRAM */
+#endif /* USER_VECT_TAB_ADDRESS */
+}
+ 8000ac8:	bf00      	nop
+ 8000aca:	46bd      	mov	sp, r7
+ 8000acc:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000ad0:	4770      	bx	lr
+ 8000ad2:	bf00      	nop
+ 8000ad4:	e000ed00 	.word	0xe000ed00
+
+08000ad8 <Reset_Handler>:
+
+    .section  .text.Reset_Handler
+  .weak  Reset_Handler
+  .type  Reset_Handler, %function
+Reset_Handler:  
+  ldr   sp, =_estack      /* set stack pointer */
+ 8000ad8:	f8df d034 	ldr.w	sp, [pc, #52]	@ 8000b10 <LoopFillZerobss+0xe>
+  
+/* Call the clock system initialization function.*/
+  bl  SystemInit  
+ 8000adc:	f7ff ffea 	bl	8000ab4 <SystemInit>
+
+/* Copy the data segment initializers from flash to SRAM */  
+  ldr r0, =_sdata
+ 8000ae0:	480c      	ldr	r0, [pc, #48]	@ (8000b14 <LoopFillZerobss+0x12>)
+  ldr r1, =_edata
+ 8000ae2:	490d      	ldr	r1, [pc, #52]	@ (8000b18 <LoopFillZerobss+0x16>)
+  ldr r2, =_sidata
+ 8000ae4:	4a0d      	ldr	r2, [pc, #52]	@ (8000b1c <LoopFillZerobss+0x1a>)
+  movs r3, #0
+ 8000ae6:	2300      	movs	r3, #0
+  b LoopCopyDataInit
+ 8000ae8:	e002      	b.n	8000af0 <LoopCopyDataInit>
+
+08000aea <CopyDataInit>:
+
+CopyDataInit:
+  ldr r4, [r2, r3]
+ 8000aea:	58d4      	ldr	r4, [r2, r3]
+  str r4, [r0, r3]
+ 8000aec:	50c4      	str	r4, [r0, r3]
+  adds r3, r3, #4
+ 8000aee:	3304      	adds	r3, #4
+
+08000af0 <LoopCopyDataInit>:
+
+LoopCopyDataInit:
+  adds r4, r0, r3
+ 8000af0:	18c4      	adds	r4, r0, r3
+  cmp r4, r1
+ 8000af2:	428c      	cmp	r4, r1
+  bcc CopyDataInit
+ 8000af4:	d3f9      	bcc.n	8000aea <CopyDataInit>
+  
+/* Zero fill the bss segment. */
+  ldr r2, =_sbss
+ 8000af6:	4a0a      	ldr	r2, [pc, #40]	@ (8000b20 <LoopFillZerobss+0x1e>)
+  ldr r4, =_ebss
+ 8000af8:	4c0a      	ldr	r4, [pc, #40]	@ (8000b24 <LoopFillZerobss+0x22>)
+  movs r3, #0
+ 8000afa:	2300      	movs	r3, #0
+  b LoopFillZerobss
+ 8000afc:	e001      	b.n	8000b02 <LoopFillZerobss>
+
+08000afe <FillZerobss>:
+
+FillZerobss:
+  str  r3, [r2]
+ 8000afe:	6013      	str	r3, [r2, #0]
+  adds r2, r2, #4
+ 8000b00:	3204      	adds	r2, #4
+
+08000b02 <LoopFillZerobss>:
+
+LoopFillZerobss:
+  cmp r2, r4
+ 8000b02:	42a2      	cmp	r2, r4
+  bcc FillZerobss
+ 8000b04:	d3fb      	bcc.n	8000afe <FillZerobss>
+  
+/* Call static constructors */
+    bl __libc_init_array
+ 8000b06:	f000 fb37 	bl	8001178 <__libc_init_array>
+/* Call the application's entry point.*/
+  bl  main
+ 8000b0a:	f7ff ff15 	bl	8000938 <main>
+  bx  lr    
+ 8000b0e:	4770      	bx	lr
+  ldr   sp, =_estack      /* set stack pointer */
+ 8000b10:	20020000 	.word	0x20020000
+  ldr r0, =_sdata
+ 8000b14:	20000000 	.word	0x20000000
+  ldr r1, =_edata
+ 8000b18:	2000000c 	.word	0x2000000c
+  ldr r2, =_sidata
+ 8000b1c:	080013f4 	.word	0x080013f4
+  ldr r2, =_sbss
+ 8000b20:	2000000c 	.word	0x2000000c
+  ldr r4, =_ebss
+ 8000b24:	20000048 	.word	0x20000048
+
+08000b28 <ADC_IRQHandler>:
+ * @retval None       
+*/
+    .section  .text.Default_Handler,"ax",%progbits
+Default_Handler:
+Infinite_Loop:
+  b  Infinite_Loop
+ 8000b28:	e7fe      	b.n	8000b28 <ADC_IRQHandler>
+	...
+
+08000b2c <HAL_Init>:
+  *         need to ensure that the SysTick time base is always set to 1 millisecond
+  *         to have correct HAL operation.
+  * @retval HAL status
+  */
+HAL_StatusTypeDef HAL_Init(void)
+{
+ 8000b2c:	b580      	push	{r7, lr}
+ 8000b2e:	af00      	add	r7, sp, #0
+  /* Configure Flash prefetch, Instruction cache, Data cache */ 
+#if (INSTRUCTION_CACHE_ENABLE != 0U)
+  __HAL_FLASH_INSTRUCTION_CACHE_ENABLE();
+ 8000b30:	4b0e      	ldr	r3, [pc, #56]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b32:	681b      	ldr	r3, [r3, #0]
+ 8000b34:	4a0d      	ldr	r2, [pc, #52]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b36:	f443 7300 	orr.w	r3, r3, #512	@ 0x200
+ 8000b3a:	6013      	str	r3, [r2, #0]
+#endif /* INSTRUCTION_CACHE_ENABLE */
+
+#if (DATA_CACHE_ENABLE != 0U)
+  __HAL_FLASH_DATA_CACHE_ENABLE();
+ 8000b3c:	4b0b      	ldr	r3, [pc, #44]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b3e:	681b      	ldr	r3, [r3, #0]
+ 8000b40:	4a0a      	ldr	r2, [pc, #40]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b42:	f443 6380 	orr.w	r3, r3, #1024	@ 0x400
+ 8000b46:	6013      	str	r3, [r2, #0]
+#endif /* DATA_CACHE_ENABLE */
+
+#if (PREFETCH_ENABLE != 0U)
+  __HAL_FLASH_PREFETCH_BUFFER_ENABLE();
+ 8000b48:	4b08      	ldr	r3, [pc, #32]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b4a:	681b      	ldr	r3, [r3, #0]
+ 8000b4c:	4a07      	ldr	r2, [pc, #28]	@ (8000b6c <HAL_Init+0x40>)
+ 8000b4e:	f443 7380 	orr.w	r3, r3, #256	@ 0x100
+ 8000b52:	6013      	str	r3, [r2, #0]
+#endif /* PREFETCH_ENABLE */
+
+  /* Set Interrupt Group Priority */
+  HAL_NVIC_SetPriorityGrouping(NVIC_PRIORITYGROUP_4);
+ 8000b54:	2003      	movs	r0, #3
+ 8000b56:	f000 f90d 	bl	8000d74 <HAL_NVIC_SetPriorityGrouping>
+
+  /* Use systick as time base source and configure 1ms tick (default clock after Reset is HSI) */
+  HAL_InitTick(TICK_INT_PRIORITY);
+ 8000b5a:	200f      	movs	r0, #15
+ 8000b5c:	f000 f808 	bl	8000b70 <HAL_InitTick>
+
+  /* Init the low level hardware */
+  HAL_MspInit();
+ 8000b60:	f7ff ff50 	bl	8000a04 <HAL_MspInit>
+
+  /* Return function status */
+  return HAL_OK;
+ 8000b64:	2300      	movs	r3, #0
+}
+ 8000b66:	4618      	mov	r0, r3
+ 8000b68:	bd80      	pop	{r7, pc}
+ 8000b6a:	bf00      	nop
+ 8000b6c:	40023c00 	.word	0x40023c00
+
+08000b70 <HAL_InitTick>:
+  *       implementation  in user file.
+  * @param TickPriority Tick interrupt priority.
+  * @retval HAL status
+  */
+__weak HAL_StatusTypeDef HAL_InitTick(uint32_t TickPriority)
+{
+ 8000b70:	b580      	push	{r7, lr}
+ 8000b72:	b082      	sub	sp, #8
+ 8000b74:	af00      	add	r7, sp, #0
+ 8000b76:	6078      	str	r0, [r7, #4]
+  /* Configure the SysTick to have interrupt in 1ms time basis*/
+  if (HAL_SYSTICK_Config(SystemCoreClock / (1000U / uwTickFreq)) > 0U)
+ 8000b78:	4b12      	ldr	r3, [pc, #72]	@ (8000bc4 <HAL_InitTick+0x54>)
+ 8000b7a:	681a      	ldr	r2, [r3, #0]
+ 8000b7c:	4b12      	ldr	r3, [pc, #72]	@ (8000bc8 <HAL_InitTick+0x58>)
+ 8000b7e:	781b      	ldrb	r3, [r3, #0]
+ 8000b80:	4619      	mov	r1, r3
+ 8000b82:	f44f 737a 	mov.w	r3, #1000	@ 0x3e8
+ 8000b86:	fbb3 f3f1 	udiv	r3, r3, r1
+ 8000b8a:	fbb2 f3f3 	udiv	r3, r2, r3
+ 8000b8e:	4618      	mov	r0, r3
+ 8000b90:	f000 f917 	bl	8000dc2 <HAL_SYSTICK_Config>
+ 8000b94:	4603      	mov	r3, r0
+ 8000b96:	2b00      	cmp	r3, #0
+ 8000b98:	d001      	beq.n	8000b9e <HAL_InitTick+0x2e>
+  {
+    return HAL_ERROR;
+ 8000b9a:	2301      	movs	r3, #1
+ 8000b9c:	e00e      	b.n	8000bbc <HAL_InitTick+0x4c>
+  }
+
+  /* Configure the SysTick IRQ priority */
+  if (TickPriority < (1UL << __NVIC_PRIO_BITS))
+ 8000b9e:	687b      	ldr	r3, [r7, #4]
+ 8000ba0:	2b0f      	cmp	r3, #15
+ 8000ba2:	d80a      	bhi.n	8000bba <HAL_InitTick+0x4a>
+  {
+    HAL_NVIC_SetPriority(SysTick_IRQn, TickPriority, 0U);
+ 8000ba4:	2200      	movs	r2, #0
+ 8000ba6:	6879      	ldr	r1, [r7, #4]
+ 8000ba8:	f04f 30ff 	mov.w	r0, #4294967295
+ 8000bac:	f000 f8ed 	bl	8000d8a <HAL_NVIC_SetPriority>
+    uwTickPrio = TickPriority;
+ 8000bb0:	4a06      	ldr	r2, [pc, #24]	@ (8000bcc <HAL_InitTick+0x5c>)
+ 8000bb2:	687b      	ldr	r3, [r7, #4]
+ 8000bb4:	6013      	str	r3, [r2, #0]
+  {
+    return HAL_ERROR;
+  }
+
+  /* Return function status */
+  return HAL_OK;
+ 8000bb6:	2300      	movs	r3, #0
+ 8000bb8:	e000      	b.n	8000bbc <HAL_InitTick+0x4c>
+    return HAL_ERROR;
+ 8000bba:	2301      	movs	r3, #1
+}
+ 8000bbc:	4618      	mov	r0, r3
+ 8000bbe:	3708      	adds	r7, #8
+ 8000bc0:	46bd      	mov	sp, r7
+ 8000bc2:	bd80      	pop	{r7, pc}
+ 8000bc4:	20000000 	.word	0x20000000
+ 8000bc8:	20000008 	.word	0x20000008
+ 8000bcc:	20000004 	.word	0x20000004
+
+08000bd0 <HAL_IncTick>:
+ * @note This function is declared as __weak to be overwritten in case of other 
+  *      implementations in user file.
+  * @retval None
+  */
+__weak void HAL_IncTick(void)
+{
+ 8000bd0:	b480      	push	{r7}
+ 8000bd2:	af00      	add	r7, sp, #0
+  uwTick += uwTickFreq;
+ 8000bd4:	4b06      	ldr	r3, [pc, #24]	@ (8000bf0 <HAL_IncTick+0x20>)
+ 8000bd6:	781b      	ldrb	r3, [r3, #0]
+ 8000bd8:	461a      	mov	r2, r3
+ 8000bda:	4b06      	ldr	r3, [pc, #24]	@ (8000bf4 <HAL_IncTick+0x24>)
+ 8000bdc:	681b      	ldr	r3, [r3, #0]
+ 8000bde:	4413      	add	r3, r2
+ 8000be0:	4a04      	ldr	r2, [pc, #16]	@ (8000bf4 <HAL_IncTick+0x24>)
+ 8000be2:	6013      	str	r3, [r2, #0]
+}
+ 8000be4:	bf00      	nop
+ 8000be6:	46bd      	mov	sp, r7
+ 8000be8:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000bec:	4770      	bx	lr
+ 8000bee:	bf00      	nop
+ 8000bf0:	20000008 	.word	0x20000008
+ 8000bf4:	20000044 	.word	0x20000044
+
+08000bf8 <HAL_GetTick>:
+  * @note This function is declared as __weak to be overwritten in case of other 
+  *       implementations in user file.
+  * @retval tick value
+  */
+__weak uint32_t HAL_GetTick(void)
+{
+ 8000bf8:	b480      	push	{r7}
+ 8000bfa:	af00      	add	r7, sp, #0
+  return uwTick;
+ 8000bfc:	4b03      	ldr	r3, [pc, #12]	@ (8000c0c <HAL_GetTick+0x14>)
+ 8000bfe:	681b      	ldr	r3, [r3, #0]
+}
+ 8000c00:	4618      	mov	r0, r3
+ 8000c02:	46bd      	mov	sp, r7
+ 8000c04:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000c08:	4770      	bx	lr
+ 8000c0a:	bf00      	nop
+ 8000c0c:	20000044 	.word	0x20000044
+
+08000c10 <__NVIC_SetPriorityGrouping>:
+           In case of a conflict between priority grouping and available
+           priority bits (__NVIC_PRIO_BITS), the smallest possible priority group is set.
+  \param [in]      PriorityGroup  Priority grouping field.
+ */
+__STATIC_INLINE void __NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+{
+ 8000c10:	b480      	push	{r7}
+ 8000c12:	b085      	sub	sp, #20
+ 8000c14:	af00      	add	r7, sp, #0
+ 8000c16:	6078      	str	r0, [r7, #4]
+  uint32_t reg_value;
+  uint32_t PriorityGroupTmp = (PriorityGroup & (uint32_t)0x07UL);             /* only values 0..7 are used          */
+ 8000c18:	687b      	ldr	r3, [r7, #4]
+ 8000c1a:	f003 0307 	and.w	r3, r3, #7
+ 8000c1e:	60fb      	str	r3, [r7, #12]
+
+  reg_value  =  SCB->AIRCR;                                                   /* read old register configuration    */
+ 8000c20:	4b0c      	ldr	r3, [pc, #48]	@ (8000c54 <__NVIC_SetPriorityGrouping+0x44>)
+ 8000c22:	68db      	ldr	r3, [r3, #12]
+ 8000c24:	60bb      	str	r3, [r7, #8]
+  reg_value &= ~((uint32_t)(SCB_AIRCR_VECTKEY_Msk | SCB_AIRCR_PRIGROUP_Msk)); /* clear bits to change               */
+ 8000c26:	68ba      	ldr	r2, [r7, #8]
+ 8000c28:	f64f 03ff 	movw	r3, #63743	@ 0xf8ff
+ 8000c2c:	4013      	ands	r3, r2
+ 8000c2e:	60bb      	str	r3, [r7, #8]
+  reg_value  =  (reg_value                                   |
+                ((uint32_t)0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
+                (PriorityGroupTmp << SCB_AIRCR_PRIGROUP_Pos)  );              /* Insert write key and priority group */
+ 8000c30:	68fb      	ldr	r3, [r7, #12]
+ 8000c32:	021a      	lsls	r2, r3, #8
+                ((uint32_t)0x5FAUL << SCB_AIRCR_VECTKEY_Pos) |
+ 8000c34:	68bb      	ldr	r3, [r7, #8]
+ 8000c36:	4313      	orrs	r3, r2
+  reg_value  =  (reg_value                                   |
+ 8000c38:	f043 63bf 	orr.w	r3, r3, #100139008	@ 0x5f80000
+ 8000c3c:	f443 3300 	orr.w	r3, r3, #131072	@ 0x20000
+ 8000c40:	60bb      	str	r3, [r7, #8]
+  SCB->AIRCR =  reg_value;
+ 8000c42:	4a04      	ldr	r2, [pc, #16]	@ (8000c54 <__NVIC_SetPriorityGrouping+0x44>)
+ 8000c44:	68bb      	ldr	r3, [r7, #8]
+ 8000c46:	60d3      	str	r3, [r2, #12]
+}
+ 8000c48:	bf00      	nop
+ 8000c4a:	3714      	adds	r7, #20
+ 8000c4c:	46bd      	mov	sp, r7
+ 8000c4e:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000c52:	4770      	bx	lr
+ 8000c54:	e000ed00 	.word	0xe000ed00
+
+08000c58 <__NVIC_GetPriorityGrouping>:
+  \brief   Get Priority Grouping
+  \details Reads the priority grouping field from the NVIC Interrupt Controller.
+  \return                Priority grouping field (SCB->AIRCR [10:8] PRIGROUP field).
+ */
+__STATIC_INLINE uint32_t __NVIC_GetPriorityGrouping(void)
+{
+ 8000c58:	b480      	push	{r7}
+ 8000c5a:	af00      	add	r7, sp, #0
+  return ((uint32_t)((SCB->AIRCR & SCB_AIRCR_PRIGROUP_Msk) >> SCB_AIRCR_PRIGROUP_Pos));
+ 8000c5c:	4b04      	ldr	r3, [pc, #16]	@ (8000c70 <__NVIC_GetPriorityGrouping+0x18>)
+ 8000c5e:	68db      	ldr	r3, [r3, #12]
+ 8000c60:	0a1b      	lsrs	r3, r3, #8
+ 8000c62:	f003 0307 	and.w	r3, r3, #7
+}
+ 8000c66:	4618      	mov	r0, r3
+ 8000c68:	46bd      	mov	sp, r7
+ 8000c6a:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000c6e:	4770      	bx	lr
+ 8000c70:	e000ed00 	.word	0xe000ed00
+
+08000c74 <__NVIC_SetPriority>:
+  \param [in]      IRQn  Interrupt number.
+  \param [in]  priority  Priority to set.
+  \note    The priority cannot be set for every processor exception.
+ */
+__STATIC_INLINE void __NVIC_SetPriority(IRQn_Type IRQn, uint32_t priority)
+{
+ 8000c74:	b480      	push	{r7}
+ 8000c76:	b083      	sub	sp, #12
+ 8000c78:	af00      	add	r7, sp, #0
+ 8000c7a:	4603      	mov	r3, r0
+ 8000c7c:	6039      	str	r1, [r7, #0]
+ 8000c7e:	71fb      	strb	r3, [r7, #7]
+  if ((int32_t)(IRQn) >= 0)
+ 8000c80:	f997 3007 	ldrsb.w	r3, [r7, #7]
+ 8000c84:	2b00      	cmp	r3, #0
+ 8000c86:	db0a      	blt.n	8000c9e <__NVIC_SetPriority+0x2a>
+  {
+    NVIC->IP[((uint32_t)IRQn)]               = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
+ 8000c88:	683b      	ldr	r3, [r7, #0]
+ 8000c8a:	b2da      	uxtb	r2, r3
+ 8000c8c:	490c      	ldr	r1, [pc, #48]	@ (8000cc0 <__NVIC_SetPriority+0x4c>)
+ 8000c8e:	f997 3007 	ldrsb.w	r3, [r7, #7]
+ 8000c92:	0112      	lsls	r2, r2, #4
+ 8000c94:	b2d2      	uxtb	r2, r2
+ 8000c96:	440b      	add	r3, r1
+ 8000c98:	f883 2300 	strb.w	r2, [r3, #768]	@ 0x300
+  }
+  else
+  {
+    SCB->SHP[(((uint32_t)IRQn) & 0xFUL)-4UL] = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
+  }
+}
+ 8000c9c:	e00a      	b.n	8000cb4 <__NVIC_SetPriority+0x40>
+    SCB->SHP[(((uint32_t)IRQn) & 0xFUL)-4UL] = (uint8_t)((priority << (8U - __NVIC_PRIO_BITS)) & (uint32_t)0xFFUL);
+ 8000c9e:	683b      	ldr	r3, [r7, #0]
+ 8000ca0:	b2da      	uxtb	r2, r3
+ 8000ca2:	4908      	ldr	r1, [pc, #32]	@ (8000cc4 <__NVIC_SetPriority+0x50>)
+ 8000ca4:	79fb      	ldrb	r3, [r7, #7]
+ 8000ca6:	f003 030f 	and.w	r3, r3, #15
+ 8000caa:	3b04      	subs	r3, #4
+ 8000cac:	0112      	lsls	r2, r2, #4
+ 8000cae:	b2d2      	uxtb	r2, r2
+ 8000cb0:	440b      	add	r3, r1
+ 8000cb2:	761a      	strb	r2, [r3, #24]
+}
+ 8000cb4:	bf00      	nop
+ 8000cb6:	370c      	adds	r7, #12
+ 8000cb8:	46bd      	mov	sp, r7
+ 8000cba:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000cbe:	4770      	bx	lr
+ 8000cc0:	e000e100 	.word	0xe000e100
+ 8000cc4:	e000ed00 	.word	0xe000ed00
+
+08000cc8 <NVIC_EncodePriority>:
+  \param [in]   PreemptPriority  Preemptive priority value (starting from 0).
+  \param [in]       SubPriority  Subpriority value (starting from 0).
+  \return                        Encoded priority. Value can be used in the function \ref NVIC_SetPriority().
+ */
+__STATIC_INLINE uint32_t NVIC_EncodePriority (uint32_t PriorityGroup, uint32_t PreemptPriority, uint32_t SubPriority)
+{
+ 8000cc8:	b480      	push	{r7}
+ 8000cca:	b089      	sub	sp, #36	@ 0x24
+ 8000ccc:	af00      	add	r7, sp, #0
+ 8000cce:	60f8      	str	r0, [r7, #12]
+ 8000cd0:	60b9      	str	r1, [r7, #8]
+ 8000cd2:	607a      	str	r2, [r7, #4]
+  uint32_t PriorityGroupTmp = (PriorityGroup & (uint32_t)0x07UL);   /* only values 0..7 are used          */
+ 8000cd4:	68fb      	ldr	r3, [r7, #12]
+ 8000cd6:	f003 0307 	and.w	r3, r3, #7
+ 8000cda:	61fb      	str	r3, [r7, #28]
+  uint32_t PreemptPriorityBits;
+  uint32_t SubPriorityBits;
+
+  PreemptPriorityBits = ((7UL - PriorityGroupTmp) > (uint32_t)(__NVIC_PRIO_BITS)) ? (uint32_t)(__NVIC_PRIO_BITS) : (uint32_t)(7UL - PriorityGroupTmp);
+ 8000cdc:	69fb      	ldr	r3, [r7, #28]
+ 8000cde:	f1c3 0307 	rsb	r3, r3, #7
+ 8000ce2:	2b04      	cmp	r3, #4
+ 8000ce4:	bf28      	it	cs
+ 8000ce6:	2304      	movcs	r3, #4
+ 8000ce8:	61bb      	str	r3, [r7, #24]
+  SubPriorityBits     = ((PriorityGroupTmp + (uint32_t)(__NVIC_PRIO_BITS)) < (uint32_t)7UL) ? (uint32_t)0UL : (uint32_t)((PriorityGroupTmp - 7UL) + (uint32_t)(__NVIC_PRIO_BITS));
+ 8000cea:	69fb      	ldr	r3, [r7, #28]
+ 8000cec:	3304      	adds	r3, #4
+ 8000cee:	2b06      	cmp	r3, #6
+ 8000cf0:	d902      	bls.n	8000cf8 <NVIC_EncodePriority+0x30>
+ 8000cf2:	69fb      	ldr	r3, [r7, #28]
+ 8000cf4:	3b03      	subs	r3, #3
+ 8000cf6:	e000      	b.n	8000cfa <NVIC_EncodePriority+0x32>
+ 8000cf8:	2300      	movs	r3, #0
+ 8000cfa:	617b      	str	r3, [r7, #20]
+
+  return (
+           ((PreemptPriority & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL)) << SubPriorityBits) |
+ 8000cfc:	f04f 32ff 	mov.w	r2, #4294967295
+ 8000d00:	69bb      	ldr	r3, [r7, #24]
+ 8000d02:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000d06:	43da      	mvns	r2, r3
+ 8000d08:	68bb      	ldr	r3, [r7, #8]
+ 8000d0a:	401a      	ands	r2, r3
+ 8000d0c:	697b      	ldr	r3, [r7, #20]
+ 8000d0e:	409a      	lsls	r2, r3
+           ((SubPriority     & (uint32_t)((1UL << (SubPriorityBits    )) - 1UL)))
+ 8000d10:	f04f 31ff 	mov.w	r1, #4294967295
+ 8000d14:	697b      	ldr	r3, [r7, #20]
+ 8000d16:	fa01 f303 	lsl.w	r3, r1, r3
+ 8000d1a:	43d9      	mvns	r1, r3
+ 8000d1c:	687b      	ldr	r3, [r7, #4]
+ 8000d1e:	400b      	ands	r3, r1
+           ((PreemptPriority & (uint32_t)((1UL << (PreemptPriorityBits)) - 1UL)) << SubPriorityBits) |
+ 8000d20:	4313      	orrs	r3, r2
+         );
+}
+ 8000d22:	4618      	mov	r0, r3
+ 8000d24:	3724      	adds	r7, #36	@ 0x24
+ 8000d26:	46bd      	mov	sp, r7
+ 8000d28:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8000d2c:	4770      	bx	lr
+	...
+
+08000d30 <SysTick_Config>:
+  \note    When the variable <b>__Vendor_SysTickConfig</b> is set to 1, then the
+           function <b>SysTick_Config</b> is not included. In this case, the file <b><i>device</i>.h</b>
+           must contain a vendor-specific implementation of this function.
+ */
+__STATIC_INLINE uint32_t SysTick_Config(uint32_t ticks)
+{
+ 8000d30:	b580      	push	{r7, lr}
+ 8000d32:	b082      	sub	sp, #8
+ 8000d34:	af00      	add	r7, sp, #0
+ 8000d36:	6078      	str	r0, [r7, #4]
+  if ((ticks - 1UL) > SysTick_LOAD_RELOAD_Msk)
+ 8000d38:	687b      	ldr	r3, [r7, #4]
+ 8000d3a:	3b01      	subs	r3, #1
+ 8000d3c:	f1b3 7f80 	cmp.w	r3, #16777216	@ 0x1000000
+ 8000d40:	d301      	bcc.n	8000d46 <SysTick_Config+0x16>
+  {
+    return (1UL);                                                   /* Reload value impossible */
+ 8000d42:	2301      	movs	r3, #1
+ 8000d44:	e00f      	b.n	8000d66 <SysTick_Config+0x36>
+  }
+
+  SysTick->LOAD  = (uint32_t)(ticks - 1UL);                         /* set reload register */
+ 8000d46:	4a0a      	ldr	r2, [pc, #40]	@ (8000d70 <SysTick_Config+0x40>)
+ 8000d48:	687b      	ldr	r3, [r7, #4]
+ 8000d4a:	3b01      	subs	r3, #1
+ 8000d4c:	6053      	str	r3, [r2, #4]
+  NVIC_SetPriority (SysTick_IRQn, (1UL << __NVIC_PRIO_BITS) - 1UL); /* set Priority for Systick Interrupt */
+ 8000d4e:	210f      	movs	r1, #15
+ 8000d50:	f04f 30ff 	mov.w	r0, #4294967295
+ 8000d54:	f7ff ff8e 	bl	8000c74 <__NVIC_SetPriority>
+  SysTick->VAL   = 0UL;                                             /* Load the SysTick Counter Value */
+ 8000d58:	4b05      	ldr	r3, [pc, #20]	@ (8000d70 <SysTick_Config+0x40>)
+ 8000d5a:	2200      	movs	r2, #0
+ 8000d5c:	609a      	str	r2, [r3, #8]
+  SysTick->CTRL  = SysTick_CTRL_CLKSOURCE_Msk |
+ 8000d5e:	4b04      	ldr	r3, [pc, #16]	@ (8000d70 <SysTick_Config+0x40>)
+ 8000d60:	2207      	movs	r2, #7
+ 8000d62:	601a      	str	r2, [r3, #0]
+                   SysTick_CTRL_TICKINT_Msk   |
+                   SysTick_CTRL_ENABLE_Msk;                         /* Enable SysTick IRQ and SysTick Timer */
+  return (0UL);                                                     /* Function successful */
+ 8000d64:	2300      	movs	r3, #0
+}
+ 8000d66:	4618      	mov	r0, r3
+ 8000d68:	3708      	adds	r7, #8
+ 8000d6a:	46bd      	mov	sp, r7
+ 8000d6c:	bd80      	pop	{r7, pc}
+ 8000d6e:	bf00      	nop
+ 8000d70:	e000e010 	.word	0xe000e010
+
+08000d74 <HAL_NVIC_SetPriorityGrouping>:
+  * @note   When the NVIC_PriorityGroup_0 is selected, IRQ preemption is no more possible. 
+  *         The pending IRQ priority will be managed only by the subpriority. 
+  * @retval None
+  */
+void HAL_NVIC_SetPriorityGrouping(uint32_t PriorityGroup)
+{
+ 8000d74:	b580      	push	{r7, lr}
+ 8000d76:	b082      	sub	sp, #8
+ 8000d78:	af00      	add	r7, sp, #0
+ 8000d7a:	6078      	str	r0, [r7, #4]
+  /* Check the parameters */
+  assert_param(IS_NVIC_PRIORITY_GROUP(PriorityGroup));
+  
+  /* Set the PRIGROUP[10:8] bits according to the PriorityGroup parameter value */
+  NVIC_SetPriorityGrouping(PriorityGroup);
+ 8000d7c:	6878      	ldr	r0, [r7, #4]
+ 8000d7e:	f7ff ff47 	bl	8000c10 <__NVIC_SetPriorityGrouping>
+}
+ 8000d82:	bf00      	nop
+ 8000d84:	3708      	adds	r7, #8
+ 8000d86:	46bd      	mov	sp, r7
+ 8000d88:	bd80      	pop	{r7, pc}
+
+08000d8a <HAL_NVIC_SetPriority>:
+  *         This parameter can be a value between 0 and 15
+  *         A lower priority value indicates a higher priority.          
+  * @retval None
+  */
+void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority)
+{ 
+ 8000d8a:	b580      	push	{r7, lr}
+ 8000d8c:	b086      	sub	sp, #24
+ 8000d8e:	af00      	add	r7, sp, #0
+ 8000d90:	4603      	mov	r3, r0
+ 8000d92:	60b9      	str	r1, [r7, #8]
+ 8000d94:	607a      	str	r2, [r7, #4]
+ 8000d96:	73fb      	strb	r3, [r7, #15]
+  uint32_t prioritygroup = 0x00U;
+ 8000d98:	2300      	movs	r3, #0
+ 8000d9a:	617b      	str	r3, [r7, #20]
+  
+  /* Check the parameters */
+  assert_param(IS_NVIC_SUB_PRIORITY(SubPriority));
+  assert_param(IS_NVIC_PREEMPTION_PRIORITY(PreemptPriority));
+  
+  prioritygroup = NVIC_GetPriorityGrouping();
+ 8000d9c:	f7ff ff5c 	bl	8000c58 <__NVIC_GetPriorityGrouping>
+ 8000da0:	6178      	str	r0, [r7, #20]
+  
+  NVIC_SetPriority(IRQn, NVIC_EncodePriority(prioritygroup, PreemptPriority, SubPriority));
+ 8000da2:	687a      	ldr	r2, [r7, #4]
+ 8000da4:	68b9      	ldr	r1, [r7, #8]
+ 8000da6:	6978      	ldr	r0, [r7, #20]
+ 8000da8:	f7ff ff8e 	bl	8000cc8 <NVIC_EncodePriority>
+ 8000dac:	4602      	mov	r2, r0
+ 8000dae:	f997 300f 	ldrsb.w	r3, [r7, #15]
+ 8000db2:	4611      	mov	r1, r2
+ 8000db4:	4618      	mov	r0, r3
+ 8000db6:	f7ff ff5d 	bl	8000c74 <__NVIC_SetPriority>
+}
+ 8000dba:	bf00      	nop
+ 8000dbc:	3718      	adds	r7, #24
+ 8000dbe:	46bd      	mov	sp, r7
+ 8000dc0:	bd80      	pop	{r7, pc}
+
+08000dc2 <HAL_SYSTICK_Config>:
+  * @param  TicksNumb Specifies the ticks Number of ticks between two interrupts.
+  * @retval status:  - 0  Function succeeded.
+  *                  - 1  Function failed.
+  */
+uint32_t HAL_SYSTICK_Config(uint32_t TicksNumb)
+{
+ 8000dc2:	b580      	push	{r7, lr}
+ 8000dc4:	b082      	sub	sp, #8
+ 8000dc6:	af00      	add	r7, sp, #0
+ 8000dc8:	6078      	str	r0, [r7, #4]
+   return SysTick_Config(TicksNumb);
+ 8000dca:	6878      	ldr	r0, [r7, #4]
+ 8000dcc:	f7ff ffb0 	bl	8000d30 <SysTick_Config>
+ 8000dd0:	4603      	mov	r3, r0
+}
+ 8000dd2:	4618      	mov	r0, r3
+ 8000dd4:	3708      	adds	r7, #8
+ 8000dd6:	46bd      	mov	sp, r7
+ 8000dd8:	bd80      	pop	{r7, pc}
+	...
+
+08000ddc <HAL_GPIO_Init>:
+  * @param  GPIO_Init pointer to a GPIO_InitTypeDef structure that contains
+  *         the configuration information for the specified GPIO peripheral.
+  * @retval None
+  */
+void HAL_GPIO_Init(GPIO_TypeDef  *GPIOx, GPIO_InitTypeDef *GPIO_Init)
+{
+ 8000ddc:	b480      	push	{r7}
+ 8000dde:	b089      	sub	sp, #36	@ 0x24
+ 8000de0:	af00      	add	r7, sp, #0
+ 8000de2:	6078      	str	r0, [r7, #4]
+ 8000de4:	6039      	str	r1, [r7, #0]
+  uint32_t position;
+  uint32_t ioposition = 0x00U;
+ 8000de6:	2300      	movs	r3, #0
+ 8000de8:	617b      	str	r3, [r7, #20]
+  uint32_t iocurrent = 0x00U;
+ 8000dea:	2300      	movs	r3, #0
+ 8000dec:	613b      	str	r3, [r7, #16]
+  uint32_t temp = 0x00U;
+ 8000dee:	2300      	movs	r3, #0
+ 8000df0:	61bb      	str	r3, [r7, #24]
+  assert_param(IS_GPIO_ALL_INSTANCE(GPIOx));
+  assert_param(IS_GPIO_PIN(GPIO_Init->Pin));
+  assert_param(IS_GPIO_MODE(GPIO_Init->Mode));
+
+  /* Configure the port pins */
+  for(position = 0U; position < GPIO_NUMBER; position++)
+ 8000df2:	2300      	movs	r3, #0
+ 8000df4:	61fb      	str	r3, [r7, #28]
+ 8000df6:	e165      	b.n	80010c4 <HAL_GPIO_Init+0x2e8>
+  {
+    /* Get the IO position */
+    ioposition = 0x01U << position;
+ 8000df8:	2201      	movs	r2, #1
+ 8000dfa:	69fb      	ldr	r3, [r7, #28]
+ 8000dfc:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000e00:	617b      	str	r3, [r7, #20]
+    /* Get the current IO position */
+    iocurrent = (uint32_t)(GPIO_Init->Pin) & ioposition;
+ 8000e02:	683b      	ldr	r3, [r7, #0]
+ 8000e04:	681b      	ldr	r3, [r3, #0]
+ 8000e06:	697a      	ldr	r2, [r7, #20]
+ 8000e08:	4013      	ands	r3, r2
+ 8000e0a:	613b      	str	r3, [r7, #16]
+
+    if(iocurrent == ioposition)
+ 8000e0c:	693a      	ldr	r2, [r7, #16]
+ 8000e0e:	697b      	ldr	r3, [r7, #20]
+ 8000e10:	429a      	cmp	r2, r3
+ 8000e12:	f040 8154 	bne.w	80010be <HAL_GPIO_Init+0x2e2>
+    {
+      /*--------------------- GPIO Mode Configuration ------------------------*/
+      /* In case of Output or Alternate function mode selection */
+      if(((GPIO_Init->Mode & GPIO_MODE) == MODE_OUTPUT) || \
+ 8000e16:	683b      	ldr	r3, [r7, #0]
+ 8000e18:	685b      	ldr	r3, [r3, #4]
+ 8000e1a:	f003 0303 	and.w	r3, r3, #3
+ 8000e1e:	2b01      	cmp	r3, #1
+ 8000e20:	d005      	beq.n	8000e2e <HAL_GPIO_Init+0x52>
+          (GPIO_Init->Mode & GPIO_MODE) == MODE_AF)
+ 8000e22:	683b      	ldr	r3, [r7, #0]
+ 8000e24:	685b      	ldr	r3, [r3, #4]
+ 8000e26:	f003 0303 	and.w	r3, r3, #3
+      if(((GPIO_Init->Mode & GPIO_MODE) == MODE_OUTPUT) || \
+ 8000e2a:	2b02      	cmp	r3, #2
+ 8000e2c:	d130      	bne.n	8000e90 <HAL_GPIO_Init+0xb4>
+      {
+        /* Check the Speed parameter */
+        assert_param(IS_GPIO_SPEED(GPIO_Init->Speed));
+        /* Configure the IO Speed */
+        temp = GPIOx->OSPEEDR; 
+ 8000e2e:	687b      	ldr	r3, [r7, #4]
+ 8000e30:	689b      	ldr	r3, [r3, #8]
+ 8000e32:	61bb      	str	r3, [r7, #24]
+        temp &= ~(GPIO_OSPEEDER_OSPEEDR0 << (position * 2U));
+ 8000e34:	69fb      	ldr	r3, [r7, #28]
+ 8000e36:	005b      	lsls	r3, r3, #1
+ 8000e38:	2203      	movs	r2, #3
+ 8000e3a:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000e3e:	43db      	mvns	r3, r3
+ 8000e40:	69ba      	ldr	r2, [r7, #24]
+ 8000e42:	4013      	ands	r3, r2
+ 8000e44:	61bb      	str	r3, [r7, #24]
+        temp |= (GPIO_Init->Speed << (position * 2U));
+ 8000e46:	683b      	ldr	r3, [r7, #0]
+ 8000e48:	68da      	ldr	r2, [r3, #12]
+ 8000e4a:	69fb      	ldr	r3, [r7, #28]
+ 8000e4c:	005b      	lsls	r3, r3, #1
+ 8000e4e:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000e52:	69ba      	ldr	r2, [r7, #24]
+ 8000e54:	4313      	orrs	r3, r2
+ 8000e56:	61bb      	str	r3, [r7, #24]
+        GPIOx->OSPEEDR = temp;
+ 8000e58:	687b      	ldr	r3, [r7, #4]
+ 8000e5a:	69ba      	ldr	r2, [r7, #24]
+ 8000e5c:	609a      	str	r2, [r3, #8]
+
+        /* Configure the IO Output Type */
+        temp = GPIOx->OTYPER;
+ 8000e5e:	687b      	ldr	r3, [r7, #4]
+ 8000e60:	685b      	ldr	r3, [r3, #4]
+ 8000e62:	61bb      	str	r3, [r7, #24]
+        temp &= ~(GPIO_OTYPER_OT_0 << position) ;
+ 8000e64:	2201      	movs	r2, #1
+ 8000e66:	69fb      	ldr	r3, [r7, #28]
+ 8000e68:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000e6c:	43db      	mvns	r3, r3
+ 8000e6e:	69ba      	ldr	r2, [r7, #24]
+ 8000e70:	4013      	ands	r3, r2
+ 8000e72:	61bb      	str	r3, [r7, #24]
+        temp |= (((GPIO_Init->Mode & OUTPUT_TYPE) >> OUTPUT_TYPE_Pos) << position);
+ 8000e74:	683b      	ldr	r3, [r7, #0]
+ 8000e76:	685b      	ldr	r3, [r3, #4]
+ 8000e78:	091b      	lsrs	r3, r3, #4
+ 8000e7a:	f003 0201 	and.w	r2, r3, #1
+ 8000e7e:	69fb      	ldr	r3, [r7, #28]
+ 8000e80:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000e84:	69ba      	ldr	r2, [r7, #24]
+ 8000e86:	4313      	orrs	r3, r2
+ 8000e88:	61bb      	str	r3, [r7, #24]
+        GPIOx->OTYPER = temp;
+ 8000e8a:	687b      	ldr	r3, [r7, #4]
+ 8000e8c:	69ba      	ldr	r2, [r7, #24]
+ 8000e8e:	605a      	str	r2, [r3, #4]
+       }
+
+      if((GPIO_Init->Mode & GPIO_MODE) != MODE_ANALOG)
+ 8000e90:	683b      	ldr	r3, [r7, #0]
+ 8000e92:	685b      	ldr	r3, [r3, #4]
+ 8000e94:	f003 0303 	and.w	r3, r3, #3
+ 8000e98:	2b03      	cmp	r3, #3
+ 8000e9a:	d017      	beq.n	8000ecc <HAL_GPIO_Init+0xf0>
+      {
+        /* Check the parameters */
+        assert_param(IS_GPIO_PULL(GPIO_Init->Pull));
+        
+        /* Activate the Pull-up or Pull down resistor for the current IO */
+        temp = GPIOx->PUPDR;
+ 8000e9c:	687b      	ldr	r3, [r7, #4]
+ 8000e9e:	68db      	ldr	r3, [r3, #12]
+ 8000ea0:	61bb      	str	r3, [r7, #24]
+        temp &= ~(GPIO_PUPDR_PUPDR0 << (position * 2U));
+ 8000ea2:	69fb      	ldr	r3, [r7, #28]
+ 8000ea4:	005b      	lsls	r3, r3, #1
+ 8000ea6:	2203      	movs	r2, #3
+ 8000ea8:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000eac:	43db      	mvns	r3, r3
+ 8000eae:	69ba      	ldr	r2, [r7, #24]
+ 8000eb0:	4013      	ands	r3, r2
+ 8000eb2:	61bb      	str	r3, [r7, #24]
+        temp |= ((GPIO_Init->Pull) << (position * 2U));
+ 8000eb4:	683b      	ldr	r3, [r7, #0]
+ 8000eb6:	689a      	ldr	r2, [r3, #8]
+ 8000eb8:	69fb      	ldr	r3, [r7, #28]
+ 8000eba:	005b      	lsls	r3, r3, #1
+ 8000ebc:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000ec0:	69ba      	ldr	r2, [r7, #24]
+ 8000ec2:	4313      	orrs	r3, r2
+ 8000ec4:	61bb      	str	r3, [r7, #24]
+        GPIOx->PUPDR = temp;
+ 8000ec6:	687b      	ldr	r3, [r7, #4]
+ 8000ec8:	69ba      	ldr	r2, [r7, #24]
+ 8000eca:	60da      	str	r2, [r3, #12]
+      }
+
+      /* In case of Alternate function mode selection */
+      if((GPIO_Init->Mode & GPIO_MODE) == MODE_AF)
+ 8000ecc:	683b      	ldr	r3, [r7, #0]
+ 8000ece:	685b      	ldr	r3, [r3, #4]
+ 8000ed0:	f003 0303 	and.w	r3, r3, #3
+ 8000ed4:	2b02      	cmp	r3, #2
+ 8000ed6:	d123      	bne.n	8000f20 <HAL_GPIO_Init+0x144>
+      {
+        /* Check the Alternate function parameter */
+        assert_param(IS_GPIO_AF(GPIO_Init->Alternate));
+        /* Configure Alternate function mapped with the current IO */
+        temp = GPIOx->AFR[position >> 3U];
+ 8000ed8:	69fb      	ldr	r3, [r7, #28]
+ 8000eda:	08da      	lsrs	r2, r3, #3
+ 8000edc:	687b      	ldr	r3, [r7, #4]
+ 8000ede:	3208      	adds	r2, #8
+ 8000ee0:	f853 3022 	ldr.w	r3, [r3, r2, lsl #2]
+ 8000ee4:	61bb      	str	r3, [r7, #24]
+        temp &= ~(0xFU << ((uint32_t)(position & 0x07U) * 4U)) ;
+ 8000ee6:	69fb      	ldr	r3, [r7, #28]
+ 8000ee8:	f003 0307 	and.w	r3, r3, #7
+ 8000eec:	009b      	lsls	r3, r3, #2
+ 8000eee:	220f      	movs	r2, #15
+ 8000ef0:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000ef4:	43db      	mvns	r3, r3
+ 8000ef6:	69ba      	ldr	r2, [r7, #24]
+ 8000ef8:	4013      	ands	r3, r2
+ 8000efa:	61bb      	str	r3, [r7, #24]
+        temp |= ((uint32_t)(GPIO_Init->Alternate) << (((uint32_t)position & 0x07U) * 4U));
+ 8000efc:	683b      	ldr	r3, [r7, #0]
+ 8000efe:	691a      	ldr	r2, [r3, #16]
+ 8000f00:	69fb      	ldr	r3, [r7, #28]
+ 8000f02:	f003 0307 	and.w	r3, r3, #7
+ 8000f06:	009b      	lsls	r3, r3, #2
+ 8000f08:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000f0c:	69ba      	ldr	r2, [r7, #24]
+ 8000f0e:	4313      	orrs	r3, r2
+ 8000f10:	61bb      	str	r3, [r7, #24]
+        GPIOx->AFR[position >> 3U] = temp;
+ 8000f12:	69fb      	ldr	r3, [r7, #28]
+ 8000f14:	08da      	lsrs	r2, r3, #3
+ 8000f16:	687b      	ldr	r3, [r7, #4]
+ 8000f18:	3208      	adds	r2, #8
+ 8000f1a:	69b9      	ldr	r1, [r7, #24]
+ 8000f1c:	f843 1022 	str.w	r1, [r3, r2, lsl #2]
+      }
+
+      /* Configure IO Direction mode (Input, Output, Alternate or Analog) */
+      temp = GPIOx->MODER;
+ 8000f20:	687b      	ldr	r3, [r7, #4]
+ 8000f22:	681b      	ldr	r3, [r3, #0]
+ 8000f24:	61bb      	str	r3, [r7, #24]
+      temp &= ~(GPIO_MODER_MODER0 << (position * 2U));
+ 8000f26:	69fb      	ldr	r3, [r7, #28]
+ 8000f28:	005b      	lsls	r3, r3, #1
+ 8000f2a:	2203      	movs	r2, #3
+ 8000f2c:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000f30:	43db      	mvns	r3, r3
+ 8000f32:	69ba      	ldr	r2, [r7, #24]
+ 8000f34:	4013      	ands	r3, r2
+ 8000f36:	61bb      	str	r3, [r7, #24]
+      temp |= ((GPIO_Init->Mode & GPIO_MODE) << (position * 2U));
+ 8000f38:	683b      	ldr	r3, [r7, #0]
+ 8000f3a:	685b      	ldr	r3, [r3, #4]
+ 8000f3c:	f003 0203 	and.w	r2, r3, #3
+ 8000f40:	69fb      	ldr	r3, [r7, #28]
+ 8000f42:	005b      	lsls	r3, r3, #1
+ 8000f44:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000f48:	69ba      	ldr	r2, [r7, #24]
+ 8000f4a:	4313      	orrs	r3, r2
+ 8000f4c:	61bb      	str	r3, [r7, #24]
+      GPIOx->MODER = temp;
+ 8000f4e:	687b      	ldr	r3, [r7, #4]
+ 8000f50:	69ba      	ldr	r2, [r7, #24]
+ 8000f52:	601a      	str	r2, [r3, #0]
+
+      /*--------------------- EXTI Mode Configuration ------------------------*/
+      /* Configure the External Interrupt or event for the current IO */
+      if((GPIO_Init->Mode & EXTI_MODE) != 0x00U)
+ 8000f54:	683b      	ldr	r3, [r7, #0]
+ 8000f56:	685b      	ldr	r3, [r3, #4]
+ 8000f58:	f403 3340 	and.w	r3, r3, #196608	@ 0x30000
+ 8000f5c:	2b00      	cmp	r3, #0
+ 8000f5e:	f000 80ae 	beq.w	80010be <HAL_GPIO_Init+0x2e2>
+      {
+        /* Enable SYSCFG Clock */
+        __HAL_RCC_SYSCFG_CLK_ENABLE();
+ 8000f62:	2300      	movs	r3, #0
+ 8000f64:	60fb      	str	r3, [r7, #12]
+ 8000f66:	4b5d      	ldr	r3, [pc, #372]	@ (80010dc <HAL_GPIO_Init+0x300>)
+ 8000f68:	6c5b      	ldr	r3, [r3, #68]	@ 0x44
+ 8000f6a:	4a5c      	ldr	r2, [pc, #368]	@ (80010dc <HAL_GPIO_Init+0x300>)
+ 8000f6c:	f443 4380 	orr.w	r3, r3, #16384	@ 0x4000
+ 8000f70:	6453      	str	r3, [r2, #68]	@ 0x44
+ 8000f72:	4b5a      	ldr	r3, [pc, #360]	@ (80010dc <HAL_GPIO_Init+0x300>)
+ 8000f74:	6c5b      	ldr	r3, [r3, #68]	@ 0x44
+ 8000f76:	f403 4380 	and.w	r3, r3, #16384	@ 0x4000
+ 8000f7a:	60fb      	str	r3, [r7, #12]
+ 8000f7c:	68fb      	ldr	r3, [r7, #12]
+
+        temp = SYSCFG->EXTICR[position >> 2U];
+ 8000f7e:	4a58      	ldr	r2, [pc, #352]	@ (80010e0 <HAL_GPIO_Init+0x304>)
+ 8000f80:	69fb      	ldr	r3, [r7, #28]
+ 8000f82:	089b      	lsrs	r3, r3, #2
+ 8000f84:	3302      	adds	r3, #2
+ 8000f86:	f852 3023 	ldr.w	r3, [r2, r3, lsl #2]
+ 8000f8a:	61bb      	str	r3, [r7, #24]
+        temp &= ~(0x0FU << (4U * (position & 0x03U)));
+ 8000f8c:	69fb      	ldr	r3, [r7, #28]
+ 8000f8e:	f003 0303 	and.w	r3, r3, #3
+ 8000f92:	009b      	lsls	r3, r3, #2
+ 8000f94:	220f      	movs	r2, #15
+ 8000f96:	fa02 f303 	lsl.w	r3, r2, r3
+ 8000f9a:	43db      	mvns	r3, r3
+ 8000f9c:	69ba      	ldr	r2, [r7, #24]
+ 8000f9e:	4013      	ands	r3, r2
+ 8000fa0:	61bb      	str	r3, [r7, #24]
+        temp |= ((uint32_t)(GPIO_GET_INDEX(GPIOx)) << (4U * (position & 0x03U)));
+ 8000fa2:	687b      	ldr	r3, [r7, #4]
+ 8000fa4:	4a4f      	ldr	r2, [pc, #316]	@ (80010e4 <HAL_GPIO_Init+0x308>)
+ 8000fa6:	4293      	cmp	r3, r2
+ 8000fa8:	d025      	beq.n	8000ff6 <HAL_GPIO_Init+0x21a>
+ 8000faa:	687b      	ldr	r3, [r7, #4]
+ 8000fac:	4a4e      	ldr	r2, [pc, #312]	@ (80010e8 <HAL_GPIO_Init+0x30c>)
+ 8000fae:	4293      	cmp	r3, r2
+ 8000fb0:	d01f      	beq.n	8000ff2 <HAL_GPIO_Init+0x216>
+ 8000fb2:	687b      	ldr	r3, [r7, #4]
+ 8000fb4:	4a4d      	ldr	r2, [pc, #308]	@ (80010ec <HAL_GPIO_Init+0x310>)
+ 8000fb6:	4293      	cmp	r3, r2
+ 8000fb8:	d019      	beq.n	8000fee <HAL_GPIO_Init+0x212>
+ 8000fba:	687b      	ldr	r3, [r7, #4]
+ 8000fbc:	4a4c      	ldr	r2, [pc, #304]	@ (80010f0 <HAL_GPIO_Init+0x314>)
+ 8000fbe:	4293      	cmp	r3, r2
+ 8000fc0:	d013      	beq.n	8000fea <HAL_GPIO_Init+0x20e>
+ 8000fc2:	687b      	ldr	r3, [r7, #4]
+ 8000fc4:	4a4b      	ldr	r2, [pc, #300]	@ (80010f4 <HAL_GPIO_Init+0x318>)
+ 8000fc6:	4293      	cmp	r3, r2
+ 8000fc8:	d00d      	beq.n	8000fe6 <HAL_GPIO_Init+0x20a>
+ 8000fca:	687b      	ldr	r3, [r7, #4]
+ 8000fcc:	4a4a      	ldr	r2, [pc, #296]	@ (80010f8 <HAL_GPIO_Init+0x31c>)
+ 8000fce:	4293      	cmp	r3, r2
+ 8000fd0:	d007      	beq.n	8000fe2 <HAL_GPIO_Init+0x206>
+ 8000fd2:	687b      	ldr	r3, [r7, #4]
+ 8000fd4:	4a49      	ldr	r2, [pc, #292]	@ (80010fc <HAL_GPIO_Init+0x320>)
+ 8000fd6:	4293      	cmp	r3, r2
+ 8000fd8:	d101      	bne.n	8000fde <HAL_GPIO_Init+0x202>
+ 8000fda:	2306      	movs	r3, #6
+ 8000fdc:	e00c      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000fde:	2307      	movs	r3, #7
+ 8000fe0:	e00a      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000fe2:	2305      	movs	r3, #5
+ 8000fe4:	e008      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000fe6:	2304      	movs	r3, #4
+ 8000fe8:	e006      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000fea:	2303      	movs	r3, #3
+ 8000fec:	e004      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000fee:	2302      	movs	r3, #2
+ 8000ff0:	e002      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000ff2:	2301      	movs	r3, #1
+ 8000ff4:	e000      	b.n	8000ff8 <HAL_GPIO_Init+0x21c>
+ 8000ff6:	2300      	movs	r3, #0
+ 8000ff8:	69fa      	ldr	r2, [r7, #28]
+ 8000ffa:	f002 0203 	and.w	r2, r2, #3
+ 8000ffe:	0092      	lsls	r2, r2, #2
+ 8001000:	4093      	lsls	r3, r2
+ 8001002:	69ba      	ldr	r2, [r7, #24]
+ 8001004:	4313      	orrs	r3, r2
+ 8001006:	61bb      	str	r3, [r7, #24]
+        SYSCFG->EXTICR[position >> 2U] = temp;
+ 8001008:	4935      	ldr	r1, [pc, #212]	@ (80010e0 <HAL_GPIO_Init+0x304>)
+ 800100a:	69fb      	ldr	r3, [r7, #28]
+ 800100c:	089b      	lsrs	r3, r3, #2
+ 800100e:	3302      	adds	r3, #2
+ 8001010:	69ba      	ldr	r2, [r7, #24]
+ 8001012:	f841 2023 	str.w	r2, [r1, r3, lsl #2]
+
+        /* Clear Rising Falling edge configuration */
+        temp = EXTI->RTSR;
+ 8001016:	4b3a      	ldr	r3, [pc, #232]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 8001018:	689b      	ldr	r3, [r3, #8]
+ 800101a:	61bb      	str	r3, [r7, #24]
+        temp &= ~((uint32_t)iocurrent);
+ 800101c:	693b      	ldr	r3, [r7, #16]
+ 800101e:	43db      	mvns	r3, r3
+ 8001020:	69ba      	ldr	r2, [r7, #24]
+ 8001022:	4013      	ands	r3, r2
+ 8001024:	61bb      	str	r3, [r7, #24]
+        if((GPIO_Init->Mode & TRIGGER_RISING) != 0x00U)
+ 8001026:	683b      	ldr	r3, [r7, #0]
+ 8001028:	685b      	ldr	r3, [r3, #4]
+ 800102a:	f403 1380 	and.w	r3, r3, #1048576	@ 0x100000
+ 800102e:	2b00      	cmp	r3, #0
+ 8001030:	d003      	beq.n	800103a <HAL_GPIO_Init+0x25e>
+        {
+          temp |= iocurrent;
+ 8001032:	69ba      	ldr	r2, [r7, #24]
+ 8001034:	693b      	ldr	r3, [r7, #16]
+ 8001036:	4313      	orrs	r3, r2
+ 8001038:	61bb      	str	r3, [r7, #24]
+        }
+        EXTI->RTSR = temp;
+ 800103a:	4a31      	ldr	r2, [pc, #196]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 800103c:	69bb      	ldr	r3, [r7, #24]
+ 800103e:	6093      	str	r3, [r2, #8]
+
+        temp = EXTI->FTSR;
+ 8001040:	4b2f      	ldr	r3, [pc, #188]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 8001042:	68db      	ldr	r3, [r3, #12]
+ 8001044:	61bb      	str	r3, [r7, #24]
+        temp &= ~((uint32_t)iocurrent);
+ 8001046:	693b      	ldr	r3, [r7, #16]
+ 8001048:	43db      	mvns	r3, r3
+ 800104a:	69ba      	ldr	r2, [r7, #24]
+ 800104c:	4013      	ands	r3, r2
+ 800104e:	61bb      	str	r3, [r7, #24]
+        if((GPIO_Init->Mode & TRIGGER_FALLING) != 0x00U)
+ 8001050:	683b      	ldr	r3, [r7, #0]
+ 8001052:	685b      	ldr	r3, [r3, #4]
+ 8001054:	f403 1300 	and.w	r3, r3, #2097152	@ 0x200000
+ 8001058:	2b00      	cmp	r3, #0
+ 800105a:	d003      	beq.n	8001064 <HAL_GPIO_Init+0x288>
+        {
+          temp |= iocurrent;
+ 800105c:	69ba      	ldr	r2, [r7, #24]
+ 800105e:	693b      	ldr	r3, [r7, #16]
+ 8001060:	4313      	orrs	r3, r2
+ 8001062:	61bb      	str	r3, [r7, #24]
+        }
+        EXTI->FTSR = temp;
+ 8001064:	4a26      	ldr	r2, [pc, #152]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 8001066:	69bb      	ldr	r3, [r7, #24]
+ 8001068:	60d3      	str	r3, [r2, #12]
+
+        temp = EXTI->EMR;
+ 800106a:	4b25      	ldr	r3, [pc, #148]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 800106c:	685b      	ldr	r3, [r3, #4]
+ 800106e:	61bb      	str	r3, [r7, #24]
+        temp &= ~((uint32_t)iocurrent);
+ 8001070:	693b      	ldr	r3, [r7, #16]
+ 8001072:	43db      	mvns	r3, r3
+ 8001074:	69ba      	ldr	r2, [r7, #24]
+ 8001076:	4013      	ands	r3, r2
+ 8001078:	61bb      	str	r3, [r7, #24]
+        if((GPIO_Init->Mode & EXTI_EVT) != 0x00U)
+ 800107a:	683b      	ldr	r3, [r7, #0]
+ 800107c:	685b      	ldr	r3, [r3, #4]
+ 800107e:	f403 3300 	and.w	r3, r3, #131072	@ 0x20000
+ 8001082:	2b00      	cmp	r3, #0
+ 8001084:	d003      	beq.n	800108e <HAL_GPIO_Init+0x2b2>
+        {
+          temp |= iocurrent;
+ 8001086:	69ba      	ldr	r2, [r7, #24]
+ 8001088:	693b      	ldr	r3, [r7, #16]
+ 800108a:	4313      	orrs	r3, r2
+ 800108c:	61bb      	str	r3, [r7, #24]
+        }
+        EXTI->EMR = temp;
+ 800108e:	4a1c      	ldr	r2, [pc, #112]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 8001090:	69bb      	ldr	r3, [r7, #24]
+ 8001092:	6053      	str	r3, [r2, #4]
+
+        /* Clear EXTI line configuration */
+        temp = EXTI->IMR;
+ 8001094:	4b1a      	ldr	r3, [pc, #104]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 8001096:	681b      	ldr	r3, [r3, #0]
+ 8001098:	61bb      	str	r3, [r7, #24]
+        temp &= ~((uint32_t)iocurrent);
+ 800109a:	693b      	ldr	r3, [r7, #16]
+ 800109c:	43db      	mvns	r3, r3
+ 800109e:	69ba      	ldr	r2, [r7, #24]
+ 80010a0:	4013      	ands	r3, r2
+ 80010a2:	61bb      	str	r3, [r7, #24]
+        if((GPIO_Init->Mode & EXTI_IT) != 0x00U)
+ 80010a4:	683b      	ldr	r3, [r7, #0]
+ 80010a6:	685b      	ldr	r3, [r3, #4]
+ 80010a8:	f403 3380 	and.w	r3, r3, #65536	@ 0x10000
+ 80010ac:	2b00      	cmp	r3, #0
+ 80010ae:	d003      	beq.n	80010b8 <HAL_GPIO_Init+0x2dc>
+        {
+          temp |= iocurrent;
+ 80010b0:	69ba      	ldr	r2, [r7, #24]
+ 80010b2:	693b      	ldr	r3, [r7, #16]
+ 80010b4:	4313      	orrs	r3, r2
+ 80010b6:	61bb      	str	r3, [r7, #24]
+        }
+        EXTI->IMR = temp;
+ 80010b8:	4a11      	ldr	r2, [pc, #68]	@ (8001100 <HAL_GPIO_Init+0x324>)
+ 80010ba:	69bb      	ldr	r3, [r7, #24]
+ 80010bc:	6013      	str	r3, [r2, #0]
+  for(position = 0U; position < GPIO_NUMBER; position++)
+ 80010be:	69fb      	ldr	r3, [r7, #28]
+ 80010c0:	3301      	adds	r3, #1
+ 80010c2:	61fb      	str	r3, [r7, #28]
+ 80010c4:	69fb      	ldr	r3, [r7, #28]
+ 80010c6:	2b0f      	cmp	r3, #15
+ 80010c8:	f67f ae96 	bls.w	8000df8 <HAL_GPIO_Init+0x1c>
+      }
+    }
+  }
+}
+ 80010cc:	bf00      	nop
+ 80010ce:	bf00      	nop
+ 80010d0:	3724      	adds	r7, #36	@ 0x24
+ 80010d2:	46bd      	mov	sp, r7
+ 80010d4:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 80010d8:	4770      	bx	lr
+ 80010da:	bf00      	nop
+ 80010dc:	40023800 	.word	0x40023800
+ 80010e0:	40013800 	.word	0x40013800
+ 80010e4:	40020000 	.word	0x40020000
+ 80010e8:	40020400 	.word	0x40020400
+ 80010ec:	40020800 	.word	0x40020800
+ 80010f0:	40020c00 	.word	0x40020c00
+ 80010f4:	40021000 	.word	0x40021000
+ 80010f8:	40021400 	.word	0x40021400
+ 80010fc:	40021800 	.word	0x40021800
+ 8001100:	40013c00 	.word	0x40013c00
+
+08001104 <HAL_GPIO_WritePin>:
+  *            @arg GPIO_PIN_RESET: to clear the port pin
+  *            @arg GPIO_PIN_SET: to set the port pin
+  * @retval None
+  */
+void HAL_GPIO_WritePin(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIO_PinState PinState)
+{
+ 8001104:	b480      	push	{r7}
+ 8001106:	b083      	sub	sp, #12
+ 8001108:	af00      	add	r7, sp, #0
+ 800110a:	6078      	str	r0, [r7, #4]
+ 800110c:	460b      	mov	r3, r1
+ 800110e:	807b      	strh	r3, [r7, #2]
+ 8001110:	4613      	mov	r3, r2
+ 8001112:	707b      	strb	r3, [r7, #1]
+  /* Check the parameters */
+  assert_param(IS_GPIO_PIN(GPIO_Pin));
+  assert_param(IS_GPIO_PIN_ACTION(PinState));
+
+  if(PinState != GPIO_PIN_RESET)
+ 8001114:	787b      	ldrb	r3, [r7, #1]
+ 8001116:	2b00      	cmp	r3, #0
+ 8001118:	d003      	beq.n	8001122 <HAL_GPIO_WritePin+0x1e>
+  {
+    GPIOx->BSRR = GPIO_Pin;
+ 800111a:	887a      	ldrh	r2, [r7, #2]
+ 800111c:	687b      	ldr	r3, [r7, #4]
+ 800111e:	619a      	str	r2, [r3, #24]
+  }
+  else
+  {
+    GPIOx->BSRR = (uint32_t)GPIO_Pin << 16U;
+  }
+}
+ 8001120:	e003      	b.n	800112a <HAL_GPIO_WritePin+0x26>
+    GPIOx->BSRR = (uint32_t)GPIO_Pin << 16U;
+ 8001122:	887b      	ldrh	r3, [r7, #2]
+ 8001124:	041a      	lsls	r2, r3, #16
+ 8001126:	687b      	ldr	r3, [r7, #4]
+ 8001128:	619a      	str	r2, [r3, #24]
+}
+ 800112a:	bf00      	nop
+ 800112c:	370c      	adds	r7, #12
+ 800112e:	46bd      	mov	sp, r7
+ 8001130:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8001134:	4770      	bx	lr
+	...
+
+08001138 <HAL_RCC_GetHCLKFreq>:
+  * @note   The SystemCoreClock CMSIS variable is used to store System Clock Frequency
+  *         and updated within this function
+  * @retval HCLK frequency
+  */
+uint32_t HAL_RCC_GetHCLKFreq(void)
+{
+ 8001138:	b480      	push	{r7}
+ 800113a:	af00      	add	r7, sp, #0
+  return SystemCoreClock;
+ 800113c:	4b03      	ldr	r3, [pc, #12]	@ (800114c <HAL_RCC_GetHCLKFreq+0x14>)
+ 800113e:	681b      	ldr	r3, [r3, #0]
+}
+ 8001140:	4618      	mov	r0, r3
+ 8001142:	46bd      	mov	sp, r7
+ 8001144:	f85d 7b04 	ldr.w	r7, [sp], #4
+ 8001148:	4770      	bx	lr
+ 800114a:	bf00      	nop
+ 800114c:	20000000 	.word	0x20000000
+
+08001150 <HAL_RCC_GetPCLK1Freq>:
+  * @note   Each time PCLK1 changes, this function must be called to update the
+  *         right PCLK1 value. Otherwise, any configuration based on this function will be incorrect.
+  * @retval PCLK1 frequency
+  */
+uint32_t HAL_RCC_GetPCLK1Freq(void)
+{
+ 8001150:	b580      	push	{r7, lr}
+ 8001152:	af00      	add	r7, sp, #0
+  /* Get HCLK source and Compute PCLK1 frequency ---------------------------*/
+  return (HAL_RCC_GetHCLKFreq() >> APBPrescTable[(RCC->CFGR & RCC_CFGR_PPRE1) >> RCC_CFGR_PPRE1_Pos]);
+ 8001154:	f7ff fff0 	bl	8001138 <HAL_RCC_GetHCLKFreq>
+ 8001158:	4602      	mov	r2, r0
+ 800115a:	4b05      	ldr	r3, [pc, #20]	@ (8001170 <HAL_RCC_GetPCLK1Freq+0x20>)
+ 800115c:	689b      	ldr	r3, [r3, #8]
+ 800115e:	0a9b      	lsrs	r3, r3, #10
+ 8001160:	f003 0307 	and.w	r3, r3, #7
+ 8001164:	4903      	ldr	r1, [pc, #12]	@ (8001174 <HAL_RCC_GetPCLK1Freq+0x24>)
+ 8001166:	5ccb      	ldrb	r3, [r1, r3]
+ 8001168:	fa22 f303 	lsr.w	r3, r2, r3
+}
+ 800116c:	4618      	mov	r0, r3
+ 800116e:	bd80      	pop	{r7, pc}
+ 8001170:	40023800 	.word	0x40023800
+ 8001174:	080013e4 	.word	0x080013e4
+
+08001178 <__libc_init_array>:
+ 8001178:	b570      	push	{r4, r5, r6, lr}
+ 800117a:	4b0d      	ldr	r3, [pc, #52]	@ (80011b0 <__libc_init_array+0x38>)
+ 800117c:	4d0d      	ldr	r5, [pc, #52]	@ (80011b4 <__libc_init_array+0x3c>)
+ 800117e:	1b5b      	subs	r3, r3, r5
+ 8001180:	109c      	asrs	r4, r3, #2
+ 8001182:	2600      	movs	r6, #0
+ 8001184:	42a6      	cmp	r6, r4
+ 8001186:	d109      	bne.n	800119c <__libc_init_array+0x24>
+ 8001188:	f000 f81a 	bl	80011c0 <_init>
+ 800118c:	4d0a      	ldr	r5, [pc, #40]	@ (80011b8 <__libc_init_array+0x40>)
+ 800118e:	4b0b      	ldr	r3, [pc, #44]	@ (80011bc <__libc_init_array+0x44>)
+ 8001190:	1b5b      	subs	r3, r3, r5
+ 8001192:	109c      	asrs	r4, r3, #2
+ 8001194:	2600      	movs	r6, #0
+ 8001196:	42a6      	cmp	r6, r4
+ 8001198:	d105      	bne.n	80011a6 <__libc_init_array+0x2e>
+ 800119a:	bd70      	pop	{r4, r5, r6, pc}
+ 800119c:	f855 3b04 	ldr.w	r3, [r5], #4
+ 80011a0:	4798      	blx	r3
+ 80011a2:	3601      	adds	r6, #1
+ 80011a4:	e7ee      	b.n	8001184 <__libc_init_array+0xc>
+ 80011a6:	f855 3b04 	ldr.w	r3, [r5], #4
+ 80011aa:	4798      	blx	r3
+ 80011ac:	3601      	adds	r6, #1
+ 80011ae:	e7f2      	b.n	8001196 <__libc_init_array+0x1e>
+ 80011b0:	080013ec 	.word	0x080013ec
+ 80011b4:	080013ec 	.word	0x080013ec
+ 80011b8:	080013ec 	.word	0x080013ec
+ 80011bc:	080013f0 	.word	0x080013f0
+
+080011c0 <_init>:
+ 80011c0:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80011c2:	bf00      	nop
+ 80011c4:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80011c6:	bc08      	pop	{r3}
+ 80011c8:	469e      	mov	lr, r3
+ 80011ca:	4770      	bx	lr
+
+080011cc <_fini>:
+ 80011cc:	b5f8      	push	{r3, r4, r5, r6, r7, lr}
+ 80011ce:	bf00      	nop
+ 80011d0:	bcf8      	pop	{r3, r4, r5, r6, r7}
+ 80011d2:	bc08      	pop	{r3}
+ 80011d4:	469e      	mov	lr, r3
+ 80011d6:	4770      	bx	lr

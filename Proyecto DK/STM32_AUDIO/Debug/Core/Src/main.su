@@ -1,0 +1,15 @@
+../Core/Src/main.c:294:17:Sonido_RelojTimer	16	static
+../Core/Src/main.c:317:13:Sonido_Tono	24	static
+../Core/Src/main.c:340:6:Sonido_Init	16	static
+../Core/Src/main.c:409:13:Sonido_NotaMusica	24	static
+../Core/Src/main.c:435:6:Sonido_Efecto	24	static
+../Core/Src/main.c:480:6:Musica_Iniciar	8	static
+../Core/Src/main.c:501:13:Musica_IniciarMenu	8	static
+../Core/Src/main.c:520:6:Musica_Detener	8	static
+../Core/Src/main.c:544:6:Sonido_Actualizar	24	static
+../Core/Src/main.c:653:13:Audio_LED_Init	32	static
+../Core/Src/main.c:681:13:Audio_Comando	16	static
+../Core/Src/main.c:796:13:Audio_Byte	16	static
+../Core/Src/main.c:830:13:Audio_UART_Init	40	static
+../Core/Src/main.c:870:5:main	24	static
+../Core/Src/main.c:983:6:Error_Handler	4	static
